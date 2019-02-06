@@ -5,11 +5,15 @@ function parse(text:string, system:Knot):TreeNode{
     var systemStack:Knot[] = [system]
     var stringpointer = 0
     var currentKnot = system
-    while(stringpointer < text.length){
-        
+
+
+    mainloop:while(stringpointer < text.length){
         for(var i = 0; i < currentKnot.knots.length; i++){
             var knot = currentKnot.knots[i]
-            if(knot.knotType == KnotType.entry){
+            if(knot.knotType == KnotType.high){
+                systemStack.push(knot.subsystem)
+                currentKnot = knot.subsystem
+            }else if(knot.knotType == KnotType.entry){
                 
             }else if(knot.knotType == KnotType.normal){
                 for(var symbol of knot.allowedSymbols){
@@ -21,6 +25,12 @@ function parse(text:string, system:Knot):TreeNode{
                     }
                 }
             }else if(knot.knotType == KnotType.exit){
+                systemStack.pop()
+                if(systemStack.length == 0){
+                    console.log('string leftover at end of parsing')
+                    break mainloop
+                }
+                currentKnot = systemStack[systemStack.length - 1].knots[0]
 
             }
             
@@ -41,11 +51,12 @@ class TreeNode{
     children:TreeNode
 }
 
-enum KnotType{entry,normal,exit}
+enum KnotType{entry,normal,exit,high}
 
 class Knot{
     knots:Knot[] = []
     allowedSymbols:string[] = []
+    subsystem:Knot
 
     constructor(public knotType:KnotType){
 
@@ -55,17 +66,15 @@ class Knot{
         return null
     }
     
-    optional():Knot{
-    
-        return null
+    optional(symbols:string[],endknot:Knot):Knot{
+        var newknot = this.normal(symbols)
+        this.knots.push(endknot)
+        return newknot
     }
     
     plus(symbols:string[]):Knot{
-        var newknot = new Knot(KnotType.normal)
-    
-        this.knots.push(newknot)
-        newknot.knots = [newknot]
-        newknot.allowedSymbols = symbols
+        var newknot = this.normal(symbols)
+        newknot.knots.push(newknot)
         return newknot
     }
     
@@ -74,13 +83,23 @@ class Knot{
         this.knots.push(endknot)
         return newknot
     }
+
+    normalp(rule:Knot):Knot{
+        this.knots.push(rule)
+        return rule
+    }
     
     normal(symbols:string[]):Knot{
-        return null
+        var newknot = new Knot(KnotType.normal)
+        newknot.allowedSymbols = symbols
+        this.knots.push(newknot)
+        return newknot
     }
 
     end():Knot{
-        return null
+        var newknot = this.normal([])
+        newknot.knotType = KnotType.exit
+        return newknot
     }
 }
 
@@ -88,5 +107,5 @@ class Knot{
 
 var text = '((a)((b)))';
 
-var braces = new Knot(KnotType.entry).normal(['[']).normal([']']).end()
+var braces = new Knot(KnotType.entry).normal(['[']).or([]).normal([']']).end()
 var ast = parse(text,braces)
