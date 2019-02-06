@@ -1,12 +1,8 @@
 //Parser
-System{
-    name:string
-    entry:Knot
-    exit:Knot
-}
 
 Knot{
-    Knots:Knot|System[]
+    type
+    Knots:Knot[]
     allowedSymbols:string[]
 }
 
