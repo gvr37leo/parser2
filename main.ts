@@ -1,7 +1,6 @@
 
-var text = '((a)((b)))'
 
-function parse(system:Knot,text:string):TreeNode{
+function parse(text:string, system:Knot):TreeNode{
     var root:TreeNode = new TreeNode()
     var systemStack:Knot[] = [system]
     var stringpointer = 0
@@ -45,35 +44,49 @@ class TreeNode{
 enum KnotType{entry,normal,exit}
 
 class Knot{
-    knotType:KnotType
-    knots:Knot[]
-    allowedSymbols:string[]
-}
+    knots:Knot[] = []
+    allowedSymbols:string[] = []
 
-function or(knot:Knot,symbols:string[]){
+    constructor(public knotType:KnotType){
 
-}
+    }
 
-function optional(){
-
-}
-
-function plus(knot:Knot,symbols:string[]):Knot{
-    var newknot = new Knot()
-    newknot.knotType = KnotType.normal
-
-    knot.knots.push(newknot)
-    newknot.knots = [newknot]
-    newknot.allowedSymbols = symbols
-    return newknot
-}
-
-function star(knot:Knot,endknot:Knot,symbols:string[]){
-    var newknot = plus(knot,symbols)
-    knot.knots.push(endknot)
-    return newknot
-}
-
-function normal(knot:Knot,symbols:string[]){
+    or(symbols:string[]):Knot{
+        return null
+    }
     
+    optional():Knot{
+    
+        return null
+    }
+    
+    plus(symbols:string[]):Knot{
+        var newknot = new Knot(KnotType.normal)
+    
+        this.knots.push(newknot)
+        newknot.knots = [newknot]
+        newknot.allowedSymbols = symbols
+        return newknot
+    }
+    
+    star(endknot:Knot,symbols:string[]):Knot{
+        var newknot = this.plus(symbols)
+        this.knots.push(endknot)
+        return newknot
+    }
+    
+    normal(symbols:string[]):Knot{
+        return null
+    }
+
+    end():Knot{
+        return null
+    }
 }
+
+
+
+var text = '((a)((b)))';
+
+var braces = new Knot(KnotType.entry).normal(['[']).normal([']']).end()
+var ast = parse(text,braces)
