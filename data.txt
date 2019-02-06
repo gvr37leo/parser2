@@ -1,0 +1,19 @@
+//Parser
+System{
+    name:string
+    entry:Knot
+    exit:Knot
+}
+
+Knot{
+    Knots:Knot|System[]
+    allowedSymbols:string[]
+}
+
+
+//AST
+TreeKnot{
+    value:string
+    KnotOrigin:Knot
+    children:TreeKnot
+}
