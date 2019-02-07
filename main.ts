@@ -1,6 +1,6 @@
 
 
-function parse(text:string, system:Knot):TreeNode{
+function parse(text:string, system:Knot,from:number):TreeNode{
     var root:TreeNode = new TreeNode()
     var systemStack:Knot[] = [system]
     var stringpointer = 0
@@ -11,16 +11,17 @@ function parse(text:string, system:Knot):TreeNode{
         for(var i = 0; i < currentKnot.knots.length; i++){
             var knot = currentKnot.knots[i]
             if(knot.knotType == KnotType.high){
+                //just go in and go back out if no fit
                 systemStack.push(knot.subsystem)
                 currentKnot = knot.subsystem
             }else if(knot.knotType == KnotType.entry){
-                
+                //check for possibilites pop back out if not fit
             }else if(knot.knotType == KnotType.normal){
                 for(var symbol of knot.allowedSymbols){
                     if(text.substr(stringpointer,symbol.length) === symbol){
                         stringpointer += symbol.length
                         currentKnot = knot
-                        i = 0
+                        i = -1
                         break
                     }
                 }
@@ -31,7 +32,6 @@ function parse(text:string, system:Knot):TreeNode{
                     break mainloop
                 }
                 currentKnot = systemStack[systemStack.length - 1].knots[0]
-
             }
             
         }
@@ -45,17 +45,21 @@ function parse(text:string, system:Knot):TreeNode{
     return root
 }
 
+function parseWithSystem(text:string, system:Knot){
+
+}
+
 class TreeNode{
     symbol:string
     origin:Knot
     children:TreeNode
 }
 
-enum KnotType{entry,normal,exit,high}
+enum KnotType{entry = 'entry',normal = 'normal',exit = 'exit',high = 'high'}
 
 class Knot{
     knots:Knot[] = []
-    knotType:KnotType
+    knotType:KnotType = KnotType.normal
     subsystem:Knot
 
     constructor(public allowedSymbols:string[]){
@@ -92,7 +96,8 @@ class Knot{
 
     or(knots:Knot[],endknot:Knot):Knot{
         for(var knot of knots){
-            knot.knots.push(endknot)
+            this.connect(knot)
+            knot.connect(endknot)
         }
         return endknot
     }
@@ -115,6 +120,8 @@ class Knot{
 
 var text = '((a)((b)))';
 var bracesHigh = Knot.subsystem(null)
-var braces = Knot.entry().connect(new Knot(['['])).or([bracesHigh,new Knot(['a']),new Knot([])],null).connect(new Knot([']'])).end()
+var endbrace = new Knot([')'])
+var braces = Knot.entry()
+braces.connect(new Knot(['('])).or([bracesHigh,new Knot(['a','b']),new Knot([])],endbrace).connect(endbrace).end()
 bracesHigh.subsystem = braces
 var ast = parse(text,braces)
