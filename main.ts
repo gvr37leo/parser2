@@ -55,57 +55,66 @@ enum KnotType{entry,normal,exit,high}
 
 class Knot{
     knots:Knot[] = []
-    allowedSymbols:string[] = []
+    knotType:KnotType
     subsystem:Knot
 
-    constructor(public knotType:KnotType){
+    constructor(public allowedSymbols:string[]){
 
     }
 
-    or(symbols:string[]):Knot{
-        return null
-    }
-    
-    optional(symbols:string[],endknot:Knot):Knot{
-        var newknot = this.normal(symbols)
-        this.knots.push(endknot)
-        return newknot
-    }
-    
-    plus(symbols:string[]):Knot{
-        var newknot = this.normal(symbols)
-        newknot.knots.push(newknot)
-        return newknot
-    }
-    
-    star(endknot:Knot,symbols:string[]):Knot{
-        var newknot = this.plus(symbols)
-        this.knots.push(endknot)
-        return newknot
+    star(knot:Knot, endknot:Knot):Knot{
+        this.optional(this.plus(knot),endknot)
+        return endknot
     }
 
-    normalp(rule:Knot):Knot{
-        this.knots.push(rule)
-        return rule
+    optional(knot:Knot,endknot:Knot):Knot{
+        this.connect(endknot)
+        this.connect(knot).connect(endknot)
+        return endknot
     }
     
-    normal(symbols:string[]):Knot{
-        var newknot = new Knot(KnotType.normal)
-        newknot.allowedSymbols = symbols
-        this.knots.push(newknot)
-        return newknot
+    plus(knot:Knot):Knot{
+        this.connect(knot)
+        knot.connect(knot)
+        return knot
     }
 
     end():Knot{
-        var newknot = this.normal([])
+        var newknot = this.connect(new Knot([]))
         newknot.knotType = KnotType.exit
         return newknot
+    }
+
+    connect(knot:Knot):Knot{
+        this.knots.push(knot)
+        return knot
+    }
+
+    or(knots:Knot[],endknot:Knot):Knot{
+        for(var knot of knots){
+            knot.knots.push(endknot)
+        }
+        return endknot
+    }
+
+    static subsystem(subsystem:Knot){
+        var knot = new Knot([])
+        knot.knotType = KnotType.high
+        knot.subsystem = subsystem
+        return knot
+    }
+
+    static entry():Knot{
+        var knot = new Knot([])
+        knot.knotType = KnotType.entry
+        return knot
     }
 }
 
 
 
 var text = '((a)((b)))';
-
-var braces = new Knot(KnotType.entry).normal(['[']).or([]).normal([']']).end()
+var bracesHigh = Knot.subsystem(null)
+var braces = Knot.entry().connect(new Knot(['['])).or([bracesHigh,new Knot(['a']),new Knot([])],null).connect(new Knot([']'])).end()
+bracesHigh.subsystem = braces
 var ast = parse(text,braces)
