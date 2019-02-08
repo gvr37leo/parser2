@@ -1,31 +1,35 @@
 
 
-function parse(text:string, system:Knot,from:number):TreeNode{
+function parse(text:string, system:Knot):TreeNode{
     var root:TreeNode = new TreeNode()
     var systemStack:Knot[] = [system]
     var stringpointer = 0
     var currentKnot = system
 
 
-    mainloop:while(stringpointer < text.length){
+    mainloop:while(stringpointer < text.length && systemStack.length > 0){
         for(var i = 0; i < currentKnot.knots.length; i++){
-            var knot = currentKnot.knots[i]
-            if(knot.knotType == KnotType.high){
+            var targetKnot = currentKnot.knots[i]
+            if(targetKnot.knotType == KnotType.high){
                 //just go in and go back out if no fit
-                systemStack.push(knot.subsystem)
-                currentKnot = knot.subsystem
-            }else if(knot.knotType == KnotType.entry){
-                //check for possibilites pop back out if not fit
-            }else if(knot.knotType == KnotType.normal){
-                for(var symbol of knot.allowedSymbols){
+                //backing out is a problem because is i is reset to 0 and cant go over the high knot
+                systemStack.push(targetKnot.subsystem)
+                currentKnot = targetKnot.subsystem
+                i = -1
+            }else if(targetKnot.knotType == KnotType.entry){
+                // should never be hit since currentknot is teleported here from a high knot
+                console.log('entry knot should not be hit')
+
+            }else if(targetKnot.knotType == KnotType.normal){
+                for(var symbol of targetKnot.allowedSymbols){
                     if(text.substr(stringpointer,symbol.length) === symbol){
                         stringpointer += symbol.length
-                        currentKnot = knot
+                        currentKnot = targetKnot
                         i = -1
                         break
                     }
                 }
-            }else if(knot.knotType == KnotType.exit){
+            }else if(targetKnot.knotType == KnotType.exit){
                 systemStack.pop()
                 if(systemStack.length == 0){
                     console.log('string leftover at end of parsing')
@@ -43,10 +47,6 @@ function parse(text:string, system:Knot,from:number):TreeNode{
     }
 
     return root
-}
-
-function parseWithSystem(text:string, system:Knot){
-
 }
 
 class TreeNode{
@@ -120,8 +120,7 @@ class Knot{
 
 var text = '((a)((b)))';
 var bracesHigh = Knot.subsystem(null)
-var endbrace = new Knot([')'])
 var braces = Knot.entry()
-braces.connect(new Knot(['('])).or([bracesHigh,new Knot(['a','b']),new Knot([])],endbrace).connect(endbrace).end()
+braces.connect(new Knot(['('])).or([bracesHigh,new Knot(['a','b']),new Knot([])],new Knot([')'])).end()
 bracesHigh.subsystem = braces
 var ast = parse(text,braces)
