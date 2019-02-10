@@ -5,6 +5,7 @@
   "main": "package.js",
   "dependencies": {
     "express": "*",
+    "typescript": "^3.3.3",
     "utilsx": "*",
     "vectorx": "*"
   },
