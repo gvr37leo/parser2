@@ -117,6 +117,17 @@ class Knot{
         return endknot
     }
 
+    group(knots:Knot[]){
+        var begin = new Knot([])
+        var end = new Knot([])
+        this.connect(begin)
+        for(var knot of knots){
+            begin.connect(knot).connect(end)
+        }
+
+        return end
+    }
+
     static subsystem(subsystem:Knot){
         var knot = new Knot([])
         knot.knotType = KnotType.high
