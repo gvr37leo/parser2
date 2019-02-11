@@ -111,20 +111,15 @@ class Knot{
 
     or(knots:Knot[],endknot:Knot):Knot{
         for(var knot of knots){
-            this.connect(knot)
-            knot.connect(endknot)
+            this.connect(knot).connect(endknot)
         }
         return endknot
     }
 
-    group(knots:Knot[]){
+    group(knot:(start:Knot) => Knot){
         var begin = new Knot([])
-        var end = new Knot([])
         this.connect(begin)
-        for(var knot of knots){
-            begin.connect(knot).connect(end)
-        }
-
+        var end = knot(begin)
         return end
     }
 
@@ -147,6 +142,6 @@ class Knot{
 var text = '((a))';
 var bracesHigh = Knot.subsystem(null)
 var braces = Knot.entry()
-braces.connect(new Knot(['('])).or([bracesHigh,new Knot(['a','b']),new Knot([])],new Knot([')'])).end()
+braces.connect(new Knot(['('])).group([bracesHigh,new Knot(['a','b']),new Knot([])]).connect(new Knot([')'])).end()
 bracesHigh.subsystem = braces
 var ast = parse(text,braces)
