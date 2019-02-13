@@ -125,16 +125,14 @@ class Knot{
         this.edges.push(edge)
         return knot
     }
-    
 
-    group(knot:(start:Knot) => Knot){
+    group(cb:(start:Knot) => Knot):Knot{
         var begin = new Knot()
-        this.normal(begin)
-        var end = knot(begin)
+        var end = new Knot()
+        this.connect(new Edge([]),begin)
+        cb(begin).connect(new Edge([]),end)
         return end
     }
-
-    
 
     static entry():Knot{
         var knot = new Knot()
@@ -151,8 +149,8 @@ class Knot{
 
 
 var text = '((a))';
-var bracesHigh = Knot.subsystem(null)
 var braces = Knot.entry()
-braces.normal(new Knot(['('])).group([bracesHigh,new Knot(['a','b']),new Knot([])]).normal(new Knot([')'])).end()
+var bracesHigh = Edge.highEdge(braces)
+braces.normal(new Edge(['('])).group(start => start.or([bracesHigh,new Edge(['a','b'])])).normal(new Edge([')'])).end()
 bracesHigh.subsystem = braces
 var ast = parse(text,braces)
