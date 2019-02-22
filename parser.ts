@@ -7,7 +7,7 @@ function parse(text:string, system:Knot):TreeNode{
     var stringpointer = 0
     // var currentKnot = system
 
-    parseRecursive(text,stringpointer,systemStack)
+    var parseresult = parseRecursive(text,stringpointer,systemStack)
 
     return root.treenode
 }
@@ -20,13 +20,15 @@ function parseRecursive(text:string,stringpointer:number, systemStack:Stack[]):{
         
 
         var validEdges = []
+        var hitsymbol
         for(let targetEdge of current.knot.edges){
 
             if(targetEdge.edgeType == EdgeType.high){
                 validEdges.push(targetEdge)
             }else if(targetEdge.edgeType == EdgeType.normal){
-                for(var symbol of targetEdge.allowedSymbols){
+                for(let symbol of targetEdge.allowedSymbols){
                     if(text.substr(stringpointer,symbol.length) === symbol){
+                        hitsymbol = symbol
                         validEdges.push(targetEdge)
                     }
                 }
@@ -40,19 +42,23 @@ function parseRecursive(text:string,stringpointer:number, systemStack:Stack[]):{
 
         for(let targetEdge of validEdges){
             if(targetEdge.edgeType == EdgeType.high){
-                systemStack.push(new Stack(targetEdge.subsystem,new TreeNode('high node', null)))
+                var treenode = new TreeNode('high node', null)
+                systemStack.push(new Stack(targetEdge.subsystem, treenode))
                 var parseResult = parseRecursive(text,stringpointer,systemStack)
                 if(parseResult.succesfull){
+                    current.treenode.children.push(treenode)
+                    stringpointer = parseResult.stringpointer
                     current.knot = targetEdge.target
                 }else{
                     continue
                 }
             }else if(targetEdge.edgeType == EdgeType.normal){
-                stringpointer += symbol.length
+                stringpointer += hitsymbol.length
                 current.knot = targetEdge.target
+                current.treenode.children.push(new TreeNode(hitsymbol,targetEdge))
 
                 if(current.knot.knotType == KnotType.normal){
-                    current.treenode.children.push(new TreeNode(symbol,targetEdge))
+                    
                 }else if(current.knot.knotType == KnotType.exit){
                     systemStack.pop()
                     return {succesfull:true,stringpointer}
