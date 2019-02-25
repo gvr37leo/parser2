@@ -1,4 +1,3 @@
-/// <reference path="Knot.ts" />
 /// <reference path="utils.ts" />
 /// <reference path="parser.ts" />
 

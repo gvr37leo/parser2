@@ -1,3 +1,4 @@
+/// <reference path="Structs.ts" />
 
 function parse(text:string, system:Knot):TreeNode{
     var fingers = [new Finger(system,0)]
@@ -54,15 +55,42 @@ function parse(text:string, system:Knot):TreeNode{
 
         fingers = nextGenFingers
     }
+    console.log('no fingers left')
+    console.log('something went wrong')
 
     return null
 }
 
-function mergeFingers(fingers:Finger[]):Finger[]{
-    for(var finger of fingers){
-        
+class FingerTree{
+    fingers:Map<Knot,Finger> = new Map()
+    fingerTrees:Map<Edge,FingerTree> = new Map()
+
+    getFingersRecursive():Finger[]{
+        var result = Array.from(this.fingers.values())
+
+        for(var fingertree of this.fingerTrees.values()){
+            result = result.concat(fingertree.getFingersRecursive()) 
+        }
+        return result
     }
-    return null//todo
+}
+
+function mergeFingers(fingers:Finger[]):Finger[]{
+    var fingerTree = new FingerTree()
+
+    for(var finger of fingers){
+        var current = fingerTree
+        for(var i = 0; i < finger.stack.length && current; i++){
+            var stackitem = finger.stack[i]
+            if(current.fingerTrees.has(stackitem) == false){
+                current.fingerTrees.set(stackitem,new FingerTree())
+            }
+            current = current.fingerTrees.get(stackitem)
+        }
+        current.fingers.set(finger.knot,finger)
+    }
+
+    return fingerTree.getFingersRecursive()
 }
 
 function reverseKnotChain(end:EdgeChain):Edge[]{
@@ -99,57 +127,3 @@ function buildTree(edges:Edge[]):TreeNode{
     return root
 }
 
-class Finger{
-
-    constructor(public knot:Knot, public stringpointer:number){
-
-    }
-    stack:Edge[]
-    edgeChain:EdgeChain
-
-    chainStep(edge:Edge){
-        this.edgeChain = this.edgeChain.add(edge)
-        this.knot = edge.target
-    }
-    
-    copy(){
-        var finger = new Finger(this.knot,this.stringpointer)
-        finger.stack = this.stack.slice()
-        finger.edgeChain = this.edgeChain
-        return finger
-    }
-}
-
-class EdgeChain{
-
-    constructor(public prev:EdgeChain, public edge:Edge){
-
-    }
-
-    add(edge:Edge){
-        var newlink = new EdgeChain(this,edge)
-        this.nexts.push(newlink)
-        return newlink
-    }
-
-    cutBranch(){
-        var current:EdgeChain = this
-        var next:EdgeChain = null
-        while(current.nexts.length <= 1){
-            next = current
-            current = current.prev
-        }
-        
-        current.nexts.splice(current.nexts.indexOf(next), 1)
-    }
-
-    nexts:EdgeChain[] = []
-}
-
-
-class TreeNode{
-    constructor(public symbol:string, public origin:Edge){
-
-    }
-    children:TreeNode[] = []
-}
