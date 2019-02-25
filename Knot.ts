@@ -2,9 +2,9 @@ enum KnotType{entry = 'entry',normal = 'normal',exit = 'exit'}
 enum EdgeType{normal = 'normal',high = 'high'}
 
 class Edge{
-    edgeType:EdgeType = EdgeType.normal
-    target:Knot
-    subsystem:Knot
+    public edgeType:EdgeType = EdgeType.normal
+    public target:Knot
+    public subsystem:Knot
     constructor(public allowedSymbols:string[]){
 
     }
@@ -14,6 +14,12 @@ class Edge{
         newedge.edgeType = EdgeType.high
         newedge.subsystem = subsystem
         return newedge
+    }
+
+    static freeEdge(knot:Knot){
+        var newEdge = new Edge([])
+        newEdge.target = knot
+        return newEdge
     }
 }
 
