@@ -1,19 +1,5 @@
-/// <reference path="test.ts" />
 
-
-// function parse(text:string, system:Knot):TreeNode{
-//     var root = new Stack(system,new TreeNode('high node', null))
-//     var systemStack = [root]
-
-//     var stringpointer = 0
-//     // var currentKnot = system
-
-//     // var parseresult = parseRecursive(text,stringpointer,systemStack)
-
-//     return root.treenode
-// }
-
-function parseFingers(text:string, system:Knot):TreeNode{
+function parse(text:string, system:Knot):TreeNode{
     var fingers = [new Finger(system,0)]
     
     while(fingers.length > 0){
@@ -27,7 +13,7 @@ function parseFingers(text:string, system:Knot):TreeNode{
                 if(targetEdge.edgeType == EdgeType.high){
                     validEdges.push(targetEdge)
                 }else if(targetEdge.edgeType == EdgeType.normal){
-                    for(let symbol of targetEdge.allowedSymbols){
+                    for(let symbol of targetEdge.allowedSymbols){//todo
                         if(text.substr(finger.stringpointer,symbol.length) === symbol){
                             validEdges.push(targetEdge)
                         }
@@ -46,7 +32,7 @@ function parseFingers(text:string, system:Knot):TreeNode{
                     newFinger.stack.push(validEdge)
                     newFinger.chainStep(Edge.freeEdge(validEdge.subsystem))
                 }else if(validEdge.edgeType == EdgeType.normal){
-                    newFinger.stringpointer += 1
+                    newFinger.stringpointer += 1//todo
                     newFinger.chainStep(validEdge)
 
 
@@ -55,10 +41,11 @@ function parseFingers(text:string, system:Knot):TreeNode{
 
                     }else if(finger.knot.knotType == KnotType.exit){
                         if(finger.stack.length == 0){
-                            
+                            return buildTree(reverseKnotChain(finger.edgeChain)) 
+                        }else{
+                            let laststack = finger.stack.pop()
+                            finger.chainStep(Edge.freeEdge(laststack.target))
                         }
-                        let laststack = finger.stack.pop()
-                        finger.chainStep(Edge.freeEdge(laststack.target))
                     }
                 }
                 
@@ -71,8 +58,11 @@ function parseFingers(text:string, system:Knot):TreeNode{
     return null
 }
 
-function mergeFingers(fingers:Finger[]){
-
+function mergeFingers(fingers:Finger[]):Finger[]{
+    for(var finger of fingers){
+        
+    }
+    return null//todo
 }
 
 function reverseKnotChain(end:EdgeChain):Edge[]{
@@ -85,63 +75,76 @@ function reverseKnotChain(end:EdgeChain):Edge[]{
     return knots
 }
 
-// function parseRecursive(text:string,stringpointer:number, systemStack:Stack[]):{succesfull:boolean,stringpointer:number}{
+function buildTree(edges:Edge[]):TreeNode{
+    var root = new TreeNode('root',null)
+    var stack = [root]
+    for(var edge of edges){
+        var lastitem = last(stack)
+        if(edge.target.knotType == KnotType.entry){
+            let hightree = new TreeNode('high',edge)
+            lastitem.children.push(hightree)
+            stack.push(hightree)
+        } else if(edge.target.knotType == KnotType.normal){
+            lastitem.children.push(new TreeNode(edge.allowedSymbols[0],edge))
+        } else if(edge.target.knotType == KnotType.exit){
+            if(stack.length == 0){
+                if(edge != last(edges)){
+                    console.error('something went wrong')
+                }
+            }else{
+                stack.pop()
+            }
+        }
+    }
+    return root
+}
 
-//     var current = last(systemStack)
+class Finger{
 
-//     while(current.knot.knotType != KnotType.exit){
+    constructor(public knot:Knot, public stringpointer:number){
+
+    }
+    stack:Edge[]
+    edgeChain:EdgeChain
+
+    chainStep(edge:Edge){
+        this.edgeChain = this.edgeChain.add(edge)
+        this.knot = edge.target
+    }
+    
+    copy(){
+        var finger = new Finger(this.knot,this.stringpointer)
+        finger.stack = this.stack.slice()
+        finger.edgeChain = this.edgeChain
+        return finger
+    }
+}
+
+class EdgeChain{
+
+    constructor(public prev:EdgeChain, public edge:Edge){
+
+    }
+
+    add(edge:Edge){
+        var newlink = new EdgeChain(this,edge)
+        this.nexts.push(newlink)
+        return newlink
+    }
+
+    cutBranch(){
+        var current:EdgeChain = this
+        var next:EdgeChain = null
+        while(current.nexts.length <= 1){
+            next = current
+            current = current.prev
+        }
         
+        current.nexts.splice(current.nexts.indexOf(next), 1)
+    }
 
-//         var validEdges = []
-//         var hitsymbol
-//         for(let targetEdge of current.knot.edges){
-
-//             if(targetEdge.edgeType == EdgeType.high){
-//                 validEdges.push(targetEdge)
-//             }else if(targetEdge.edgeType == EdgeType.normal){
-//                 for(let symbol of targetEdge.allowedSymbols){
-//                     if(text.substr(stringpointer,symbol.length) === symbol){
-//                         hitsymbol = symbol
-//                         validEdges.push(targetEdge)
-//                     }
-//                 }
-//             }
-//         }
-
-//         if(validEdges.length == 0){
-//             systemStack.pop()
-//             return {succesfull:false,stringpointer:0}
-//         }
-
-//         for(let targetEdge of validEdges){
-//             if(targetEdge.edgeType == EdgeType.high){
-//                 var treenode = new TreeNode('high node', null)
-//                 systemStack.push(new Stack(targetEdge.subsystem, treenode))
-//                 var parseResult = parseRecursive(text,stringpointer,systemStack)
-//                 if(parseResult.succesfull){
-//                     current.treenode.children.push(treenode)
-//                     stringpointer = parseResult.stringpointer
-//                     current.knot = targetEdge.target
-//                 }else{
-//                     continue
-//                 }
-//             }else if(targetEdge.edgeType == EdgeType.normal){
-//                 stringpointer += hitsymbol.length
-//                 current.knot = targetEdge.target
-//                 current.treenode.children.push(new TreeNode(hitsymbol,targetEdge))
-
-//                 if(current.knot.knotType == KnotType.normal){
-                    
-//                 }else if(current.knot.knotType == KnotType.exit){
-//                     systemStack.pop()
-//                     return {succesfull:true,stringpointer}
-//                 }
-//             }
-
-//             break//take the first one, fingers not yet supported
-//         }
-//     }
-// }
+    nexts:EdgeChain[] = []
+}
 
 
 class TreeNode{
