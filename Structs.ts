@@ -85,7 +85,7 @@ class Finger{
     constructor(public knot:Knot, public stringpointer:number){
 
     }
-    stack:Edge[]
+    stack:Edge[] = []
     edgeChain:EdgeChain
 
     chainStep(edge:Edge){

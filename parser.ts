@@ -2,9 +2,11 @@
 
 function parse(text:string, system:Knot):TreeNode{
     var fingers = [new Finger(system,0)]
+    fingers[0].edgeChain = new EdgeChain(null,null)
+    
     
     while(fingers.length > 0){
-        mergeFingers(fingers)
+        fingers = mergeFingers(fingers)
         var nextGenFingers = []
         for(var finger of fingers){
 
@@ -14,9 +16,13 @@ function parse(text:string, system:Knot):TreeNode{
                 if(targetEdge.edgeType == EdgeType.high){
                     validEdges.push(targetEdge)
                 }else if(targetEdge.edgeType == EdgeType.normal){
-                    for(let symbol of targetEdge.allowedSymbols){//todo
-                        if(text.substr(finger.stringpointer,symbol.length) === symbol){
-                            validEdges.push(targetEdge)
+                    if(targetEdge.allowedSymbols.length == 0){
+                        validEdges.push(targetEdge)
+                    }else{
+                        for(let symbol of targetEdge.allowedSymbols){//todo
+                            if(text.substr(finger.stringpointer,symbol.length) === symbol){
+                                validEdges.push(targetEdge)
+                            }
                         }
                     }
                 }
@@ -38,14 +44,14 @@ function parse(text:string, system:Knot):TreeNode{
 
 
 
-                    if(finger.knot.knotType == KnotType.normal){
+                    if(validEdge.target.knotType == KnotType.normal){
 
-                    }else if(finger.knot.knotType == KnotType.exit){
-                        if(finger.stack.length == 0){
+                    }else if(validEdge.target.knotType == KnotType.exit){
+                        if(newFinger.stack.length == 0){
                             return buildTree(reverseKnotChain(finger.edgeChain)) 
                         }else{
-                            let laststack = finger.stack.pop()
-                            finger.chainStep(Edge.freeEdge(laststack.target))
+                            let laststack = newFinger.stack.pop()
+                            newFinger.chainStep(Edge.freeEdge(laststack.target))
                         }
                     }
                 }
@@ -87,7 +93,11 @@ function mergeFingers(fingers:Finger[]):Finger[]{
             }
             current = current.fingerTrees.get(stackitem)
         }
-        current.fingers.set(finger.knot,finger)
+        if(current.fingers.has(finger.knot)){
+            //choose one
+        }else{
+            current.fingers.set(finger.knot,finger)
+        }
     }
 
     return fingerTree.getFingersRecursive()
