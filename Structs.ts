@@ -104,14 +104,15 @@ class Finger{
 
 class EdgeChain{
 
-    depth:number
+    depth:number = 0
 
     constructor(public prev:EdgeChain, public edge:Edge, public symbol:string){
-        this.depth = prev.depth + 1
+        
     }
 
     add(edge:Edge, symbol:string){
         var newlink = new EdgeChain(this,edge,symbol)
+        newlink.depth = this.depth + 1
         this.nexts.push(newlink)
         return newlink
     }

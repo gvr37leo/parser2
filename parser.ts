@@ -148,7 +148,9 @@ function buildTree(chain:EdgeChain[]):TreeNode{
                 stack.pop()
             }
         }else{
-            current.children.push(new TreeNode(chainlink.symbol,chainlink.edge))
+            if(chainlink.symbol.length > 0){
+                current.children.push(new TreeNode(chainlink.symbol,chainlink.edge))
+            }
         }
     }
     return root
