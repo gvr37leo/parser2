@@ -1,5 +1,5 @@
 enum KnotType{entry = 'entry',normal = 'normal',exit = 'exit'}
-enum EdgeType{normal = 'normal',high = 'high'}
+enum EdgeType{normal = 'normal',high = 'high', entering = 'entering', exiting = 'exiting'}
 
 class Edge{
     public edgeType:EdgeType = EdgeType.normal
@@ -16,9 +16,10 @@ class Edge{
         return newedge
     }
 
-    static freeEdge(knot:Knot){
+    static freeEdge(knot:Knot, edgeType:EdgeType){
         var newEdge = new Edge([])
         newEdge.target = knot
+        newEdge.edgeType = edgeType
         return newEdge
     }
 }
@@ -88,8 +89,8 @@ class Finger{
     stack:Edge[] = []
     edgeChain:EdgeChain
 
-    chainStep(edge:Edge){
-        this.edgeChain = this.edgeChain.add(edge)
+    chainStep(edge:Edge, symbol:string){
+        this.edgeChain = this.edgeChain.add(edge, symbol)
         this.knot = edge.target
     }
     
@@ -103,12 +104,14 @@ class Finger{
 
 class EdgeChain{
 
-    constructor(public prev:EdgeChain, public edge:Edge){
+    depth:number
 
+    constructor(public prev:EdgeChain, public edge:Edge, public symbol:string){
+        this.depth = prev.depth + 1
     }
 
-    add(edge:Edge){
-        var newlink = new EdgeChain(this,edge)
+    add(edge:Edge, symbol:string){
+        var newlink = new EdgeChain(this,edge,symbol)
         this.nexts.push(newlink)
         return newlink
     }
@@ -122,6 +125,25 @@ class EdgeChain{
         }
         
         current.nexts.splice(current.nexts.indexOf(next), 1)
+    }
+
+    static findCommonAncestor(a:EdgeChain,b:EdgeChain):EdgeChain{
+        var dist = [0,0]
+        var items = [a,b]
+        items.sort((a,b) => a.depth - b.depth)
+        var high = items[0]
+        var deep = items[1]
+        while(deep.depth > high.depth){
+            deep = deep.prev
+        }
+
+        while(high != deep){
+            high = high.prev
+            deep = deep.prev
+        }
+
+
+        return deep
     }
 
     nexts:EdgeChain[] = []
