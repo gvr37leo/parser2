@@ -28,32 +28,6 @@ class Knot{
     edges:Edge[] = []
     knotType:KnotType = KnotType.normal
 
-    star(edge:Edge):Knot{
-        return this.connect(edge,this)
-    }
-
-    optional(edge:Edge):Knot{
-        var newknot = new Knot
-        this.connect(edge,newknot)
-        this.connect(new Edge([]),newknot)
-        return newknot
-    }
-
-    or(edges:Edge[]):Knot{
-        var endknot = new Knot()
-        for(var edge of edges){
-            this.connect(edge,endknot)
-        }
-        return endknot
-    }
-    
-    plus(edge:Edge):Knot{
-        return this.normal(edge).star(edge)
-    }
-
-    normal(edge:Edge):Knot{
-        return this.connect(edge,new Knot())
-    }
 
     connect(edge:Edge,knot:Knot):Knot{
         edge.target = knot
@@ -61,18 +35,9 @@ class Knot{
         return knot
     }
 
-    group(cb:(start:Knot) => Knot):Knot{
-        var begin = new Knot()
-        var end = new Knot()
-        this.connect(new Edge([]),begin)
-        cb(begin).connect(new Edge([]),end)
-        return end
-    }
-
-    static entry():Knot{
-        var knot = new Knot()
-        knot.knotType = KnotType.entry
-        return knot
+    begin():Knot{
+        this.knotType = KnotType.entry
+        return this
     }
 
     end():Knot{
@@ -156,4 +121,44 @@ class TreeNode{
 
     }
     children:TreeNode[] = []
+}
+
+class System{
+    begin:Knot
+    end:Knot
+    constructor(){
+        this.begin = new Knot()
+        this.end = new Knot()
+    }
+}
+
+function Diagram(systems:System[]):System{
+    var res = mergeSystems(systems)
+    res.begin.begin()
+    res.end.end()
+    return res
+}
+
+function optional(system:System):System{
+    var res = new System()
+    res.begin.connect(new Edge([]), res.end)
+    return res
+}
+
+function or(systems:System[]):System{
+    var res = new System()
+    
+    return res
+}
+
+function plus(normal:System,repeat:System):System{
+    return null
+}
+
+function star(normal:System,repeat:System):System{
+    return null
+}
+
+function mergeSystems(systems:System[]):System{
+    return null
 }

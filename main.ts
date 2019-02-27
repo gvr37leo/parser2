@@ -23,4 +23,29 @@ d.connect(new Edge([]),c)
 d.connect(new Edge([]),e)
 e.connect(new Edge([')']),f)
 
+//https://github.com/tabatkins/railroad-diagrams
+// Diagram(
+//     '(',
+//     ZeroOrMore(
+//       Choice(0,'a','V')
+//     ),
+//     ')',
+//   )
+//https://tabatkins.github.io/railroad-diagrams/generator.html#Diagram(%0A%20%20'('%2C%0A%20%20ZeroOrMore(%0A%20%20%20%20Choice(0%2C'a'%2C'V')%0A%20%20)%2C%0A%20%20')'%2C%0A)
+
+// var braces = Diagram([
+//     new Edge(['(']),
+//     star(
+//         or([
+//             new Edge(['a']),
+//             new Edge(['V']),
+//         ]),
+//         new Edge([])
+//     ),
+//     new Edge([')']),
+// ])
+
+//knot - (edge | ?) - knot
+//melt the knots together
+
 var ast = parse(text,a)
