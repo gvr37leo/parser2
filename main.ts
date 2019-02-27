@@ -7,7 +7,7 @@ var text = '(())';
 // braces.normal(new Edge(['('])).or([bracesHigh,new Edge(['a','b'])]).normal(new Edge([')'])).end()
 
 
-var a = Knot.entry()
+var a = new Knot().begin()
 var b = new Knot()
 var c = new Knot()
 var d = new Knot()
@@ -33,19 +33,19 @@ e.connect(new Edge([')']),f)
 //   )
 //https://tabatkins.github.io/railroad-diagrams/generator.html#Diagram(%0A%20%20'('%2C%0A%20%20ZeroOrMore(%0A%20%20%20%20Choice(0%2C'a'%2C'V')%0A%20%20)%2C%0A%20%20')'%2C%0A)
 
-// var braces = Diagram([
-//     new Edge(['(']),
-//     star(
-//         or([
-//             new Edge(['a']),
-//             new Edge(['V']),
-//         ]),
-//         new Edge([])
-//     ),
-//     new Edge([')']),
-// ])
+var braces = Diagram([
+    terminal(new Edge(['('])),
+    star(
+        or([
+            terminal(new Edge(['a'])),
+            terminal(new Edge(['V'])),
+        ]),
+        terminal(new Edge([]))
+    ),
+    terminal(new Edge([')'])),
+])
 
 //knot - (edge | ?) - knot
 //melt the knots together
 
-var ast = parse(text,a)
+var ast = parse(text,braces.begin)

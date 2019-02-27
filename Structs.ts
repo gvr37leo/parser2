@@ -2,9 +2,9 @@ enum KnotType{entry = 'entry',normal = 'normal',exit = 'exit'}
 enum EdgeType{normal = 'normal',high = 'high', entering = 'entering', exiting = 'exiting'}
 
 class Edge{
-    public edgeType:EdgeType = EdgeType.normal
-    public target:Knot
-    public subsystem:Knot
+    edgeType:EdgeType = EdgeType.normal
+    target:Knot
+    subsystem:Knot
     constructor(public allowedSymbols:string[]){
 
     }
@@ -35,6 +35,13 @@ class Knot{
         return knot
     }
 
+    bind(knot:Knot){
+        var edge = new Edge([])
+        edge.target = knot
+        this.edges.push(edge)
+        return knot
+    }
+
     begin():Knot{
         this.knotType = KnotType.entry
         return this
@@ -42,6 +49,10 @@ class Knot{
 
     end():Knot{
         this.knotType = KnotType.exit
+        return this
+    }
+
+    pilver(knot:Knot):Knot{
         return this
     }
 }
@@ -141,24 +152,42 @@ function Diagram(systems:System[]):System{
 
 function optional(system:System):System{
     var res = new System()
-    res.begin.connect(new Edge([]), res.end)
+    res.begin.bind(res.end)
+    res.begin.bind(system.begin)
+    system.end.bind(system.end)
     return res
 }
 
 function or(systems:System[]):System{
     var res = new System()
-    
+    for(var system of systems){
+        res.begin.edges = system.begin.edges
+        res.end.pilver(system.end)
+    }
     return res
 }
 
 function plus(normal:System,repeat:System):System{
-    return null
+    normal.end.edges = repeat.begin.edges
+    normal.begin.pilver(repeat.end)
+    return normal
 }
 
 function star(normal:System,repeat:System):System{
-    return null
+    return optional(plus(normal,repeat))
 }
 
 function mergeSystems(systems:System[]):System{
-    return null
+    for(var i = 1; i < systems.length; i++){
+        var left = systems[i - 1]
+        var right = systems[i]
+        left.end.edges = right.begin.edges
+    }
+    return systems[0]
+}
+
+function terminal(edge:Edge){
+    var res = new System()
+    res.begin.connect(edge,res.end)
+    return res
 }
