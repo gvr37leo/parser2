@@ -3,6 +3,7 @@ enum EdgeType{normal = 'normal',high = 'high', entering = 'entering', exiting = 
 
 class Edge{
     edgeType:EdgeType = EdgeType.normal
+    origin:Knot
     target:Knot
     subsystem:Knot
     constructor(public allowedSymbols:string[]){
@@ -15,31 +16,35 @@ class Edge{
         newedge.subsystem = subsystem
         return newedge
     }
-
-    static freeEdge(knot:Knot, edgeType:EdgeType){
-        var newEdge = new Edge([])
-        newEdge.target = knot
-        newEdge.edgeType = edgeType
-        return newEdge
-    }
 }
 
 class Knot{
     edges:Edge[] = []
+    edgesIn:Edge[] = []
     knotType:KnotType = KnotType.normal
 
+    bind(knot:Knot):Edge{
+        var edge = new Edge([])
+        this.connect(edge,knot)
+        return edge
+    }
 
     connect(edge:Edge,knot:Knot):Knot{
+        edge.origin = this
         edge.target = knot
+        knot.edgesIn.push(edge)
         this.edges.push(edge)
         return knot
     }
 
-    bind(knot:Knot){
+    freeEdge(knot:Knot, edgeType:EdgeType){//this edge is only used for the chains in fingers
         var edge = new Edge([])
+        edge.origin = this
         edge.target = knot
-        this.edges.push(edge)
-        return knot
+        this.connect
+
+        edge.edgeType = edgeType
+        return edge
     }
 
     begin():Knot{
@@ -52,7 +57,9 @@ class Knot{
         return this
     }
 
-    pilver(knot:Knot):Knot{
+    pilver(victim:Knot):Knot{
+        this.edgesIn = victim.edgesIn
+        this.edgesIn.forEach(e => e.target = this)
         return this
     }
 }
@@ -143,11 +150,10 @@ class System{
     }
 }
 
-function Diagram(systems:System[]):System{
-    var res = mergeSystems(systems)
-    res.begin.begin()
-    res.end.end()
-    return res
+function Diagram(holder:System,systems:System[]):void{
+    mergeSystems(holder, systems)
+    holder.begin.begin()
+    holder.end.end()
 }
 
 function optional(system:System):System{
@@ -158,10 +164,10 @@ function optional(system:System):System{
     return res
 }
 
-function or(systems:System[]):System{
+function choice(systems:System[]):System{
     var res = new System()
     for(var system of systems){
-        res.begin.edges = system.begin.edges
+        append(res.begin.edges, system.begin.edges)
         res.end.pilver(system.end)
     }
     return res
@@ -177,17 +183,26 @@ function star(normal:System,repeat:System):System{
     return optional(plus(normal,repeat))
 }
 
-function mergeSystems(systems:System[]):System{
+function mergeSystems(holder:System, systems:System[]){
     for(var i = 1; i < systems.length; i++){
         var left = systems[i - 1]
         var right = systems[i]
         left.end.edges = right.begin.edges
     }
-    return systems[0]
+    holder.begin.edges = systems[0].begin.edges
+    holder.end.pilver(last(systems).end)
 }
 
-function terminal(edge:Edge){
+function terminal(edge:Edge):System{
     var res = new System()
     res.begin.connect(edge,res.end)
+    edge.target = res.end
     return res
+}
+
+function subsystem(system:System):System{
+    var subsystem = new System()
+    subsystem.begin.freeEdge(system.begin, EdgeType.entering)
+    subsystem.end.freeEdge(system.end, EdgeType.exiting)
+    return system
 }

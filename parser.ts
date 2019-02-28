@@ -43,7 +43,7 @@ function parse(text:string, system:Knot):TreeNode{
                 nextGenFingers.push(newFinger)
                 if(validEdge.edgeType == EdgeType.high){
                     newFinger.stack.push(validEdge)
-                    newFinger.chainStep(Edge.freeEdge(validEdge.subsystem, EdgeType.entering),'')
+                    newFinger.chainStep(newFinger.knot.freeEdge(validEdge.subsystem, EdgeType.entering),'')
                 }else if(validEdge.edgeType == EdgeType.normal){
                     newFinger.stringpointer += symbols[i].length
                     newFinger.chainStep(validEdge,symbols[i])
@@ -57,7 +57,7 @@ function parse(text:string, system:Knot):TreeNode{
                             return buildTree(reverseEdgeChain(newFinger.edgeChain)) 
                         }else{
                             let laststack = newFinger.stack.pop()
-                            newFinger.chainStep(Edge.freeEdge(laststack.target, EdgeType.exiting),'')
+                            newFinger.chainStep(newFinger.knot.freeEdge(laststack.target, EdgeType.exiting),'')
                         }
                     }
                 }

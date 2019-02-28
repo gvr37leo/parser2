@@ -4,7 +4,7 @@
   "description": "",
   "main": "package.js",
   "dependencies": {
-    "express": "*",
+    "express": "^4.16.4",
     "typescript": "^3.3.3",
     "utilsx": "*",
     "vectorx": "*"
