@@ -27,16 +27,26 @@ var text = '(())';
 
 //https://github.com/tabatkins/railroad-diagrams
 //https://tabatkins.github.io/railroad-diagrams/generator.html#Diagram(%0A%20%20'('%2C%0A%20%20ZeroOrMore(%0A%20%20%20%20Choice(0%2C'a'%2C'V')%0A%20%20)%2C%0A%20%20')'%2C%0A)
+// var braces:System = new System()
+// Diagram(braces,[
+//     terminal(new Edge(['('])),
+//     star(
+//         choice([
+//             terminal(new Edge(['a'])),
+//             subsystem(braces),
+//         ]),
+//         terminal(new Edge([]))
+//     ),
+//     terminal(new Edge([')'])),
+// ])
+
 var braces:System = new System()
 Diagram(braces,[
     terminal(new Edge(['('])),
-    star(
-        choice([
-            terminal(new Edge(['a'])),
-            subsystem(braces),
-        ]),
-        terminal(new Edge([]))
-    ),
+    choice([
+        terminal(new Edge([])),
+        subsystem(braces),
+    ]),
     terminal(new Edge([')'])),
 ])
 
