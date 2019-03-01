@@ -16,6 +16,11 @@ class Edge{
         newedge.subsystem = subsystem
         return newedge
     }
+
+    checkValidity(){
+        return this.target.edgesIn.findIndex(e => e == this) != -1 &&
+        this.origin.edges.findIndex(e => e == this) != -1
+    }
 }
 
 class Knot{
@@ -65,6 +70,21 @@ class Knot{
         append(this.edges,victim.edges)
         this.edges.forEach(e => e.origin = this)
         return this
+    }
+
+    checkValidity(){
+        for(var edge of this.edges){
+            if(edge.origin != this){
+                return false
+            }
+            
+        }
+        for(var edge of this.edgesIn){
+            if(edge.target != this){
+                return false
+            }
+        }
+        return true
     }
 }
 
