@@ -35,6 +35,7 @@ function parse(text:string, system:Knot):TreeNode{
 
             if(validEdges.length == 0){
                 finger.edgeChain.cutBranch()
+                continue
             }
 
             for(let i = 0; i < validEdges.length; i++){

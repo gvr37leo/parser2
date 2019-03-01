@@ -38,8 +38,10 @@ class Knot{
     }
 
     freeEdge(knot:Knot, edgeType:EdgeType){//this edge is only used for the chains in fingers
-        var edge = this.bind(knot)
+        var edge = new Edge([])
         edge.edgeType = edgeType
+        edge.target = knot
+        edge.origin = this
         return edge
     }
 
@@ -185,7 +187,7 @@ function terminal(edge:Edge):System{
 
 function subsystem(system:System):System{
     var subsystem = new System()
-    subsystem.begin.freeEdge(system.begin, EdgeType.entering)
-    system.end.freeEdge(subsystem.end, EdgeType.exiting)
+    var newedge = Edge.highEdge(system.begin)
+    subsystem.begin.connect(newedge,subsystem.end)
     return subsystem
 }

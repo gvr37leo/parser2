@@ -1,7 +1,7 @@
 /// <reference path="utils.ts" />
 /// <reference path="parser.ts" />
 
-var text = '(())';
+
 // var bracesHigh = Edge.highEdge(braces)
 // braces.normal(new Edge(['('])).group(start => start.or([bracesHigh,new Edge(['a','b'])])).normal(new Edge([')'])).end()
 // braces.normal(new Edge(['('])).or([bracesHigh,new Edge(['a','b'])]).normal(new Edge([')'])).end()
@@ -27,26 +27,19 @@ var text = '(())';
 
 //https://github.com/tabatkins/railroad-diagrams
 //https://tabatkins.github.io/railroad-diagrams/generator.html#Diagram(%0A%20%20'('%2C%0A%20%20ZeroOrMore(%0A%20%20%20%20Choice(0%2C'a'%2C'V')%0A%20%20)%2C%0A%20%20')'%2C%0A)
-// var braces:System = new System()
-// Diagram(braces,[
-//     terminal(new Edge(['('])),
-//     star(
-//         choice([
-//             terminal(new Edge(['a'])),
-//             subsystem(braces),
-//         ]),
-//         terminal(new Edge([]))
-//     ),
-//     terminal(new Edge([')'])),
-// ])
 
+debugger
+var text = '((a))';
 var braces:System = new System()
 Diagram(braces,[
     terminal(new Edge(['('])),
-    choice([
-        terminal(new Edge([])),
-        subsystem(braces),
-    ]),
+    star(
+        choice([
+            terminal(new Edge(['a'])),
+            subsystem(braces),
+        ]),
+        terminal(new Edge([]))
+    ),
     terminal(new Edge([')'])),
 ])
 
