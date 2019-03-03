@@ -1,14 +1,23 @@
 /// <reference path="Structs.ts" />
+class Parser{
 
-function parse(text:string, system:Knot):TreeNode{
-    var fingers = [new Finger(system,0)]
-    fingers[0].edgeChain = new EdgeChain(null,null,'')
-    
-    
-    while(fingers.length > 0){
-        fingers = mergeFingers(fingers)
+    fingers:Finger[] = []
+    tree:TreeNode
+    constructor(system:Knot){
+        this.fingers = [new Finger(system,0)]
+        this.fingers[0].edgeChain = new EdgeChain(null,null,'')
+    }
+
+    run(){
+        while(this.fingers.length > 0 && this.tree == null){
+            this.step()
+        }
+    }
+
+    step(){
+        this.fingers = mergeFingers(this.fingers)
         var nextGenFingers = []
-        for(var finger of fingers){
+        for(var finger of this.fingers){
 
             var validEdges:Edge[] = []
             var symbols:string[] = []
@@ -55,7 +64,8 @@ function parse(text:string, system:Knot):TreeNode{
 
                     }else if(validEdge.target.knotType == KnotType.exit){
                         if(newFinger.stack.length == 0){
-                            return buildTree(reverseEdgeChain(newFinger.edgeChain)) 
+                            this.fingers = nextGenFingers
+                            this.tree = buildTree(reverseEdgeChain(newFinger.edgeChain)) 
                         }else{
                             let laststack = newFinger.stack.pop()
                             newFinger.chainStep(newFinger.knot.freeEdge(laststack.target, EdgeType.exiting),'')
@@ -66,12 +76,9 @@ function parse(text:string, system:Knot):TreeNode{
             }
         }
 
-        fingers = nextGenFingers
+        this.fingers = nextGenFingers
+    
     }
-    console.log('no fingers left')
-    console.log('something went wrong')
-
-    return null
 }
 
 class FingerTree{
@@ -88,6 +95,16 @@ class FingerTree{
     }
 }
 
+function fingerCompare(a:Finger,b:Finger):number{
+    var result = a.stringpointer - b.stringpointer
+    if(result == 0){
+        result = b.edgeChain.depth - a.edgeChain.depth
+    }else{
+        return result
+    }
+    return result
+}
+
 function mergeFingers(fingers:Finger[]):Finger[]{
     var fingerTree = new FingerTree()
 
@@ -101,14 +118,14 @@ function mergeFingers(fingers:Finger[]):Finger[]{
             current = current.fingerTrees.get(stackitem)
         }
         if(current.fingers.has(finger.knot)){
-            var a = finger.edgeChain
-            var b = current.fingers.get(finger.knot).edgeChain
+            var a = finger
+            var b = current.fingers.get(finger.knot)
             // var dist = EdgeChain.findCommonAncestor(a,b)
-            if(a.depth < b.depth){
-                current.fingers.set(finger.knot,finger)
-                b.cutBranch()
+            if(fingerCompare(a,b) > 0){
+                current.fingers.set(a.knot,a)
+                b.edgeChain.cutBranch()
             }else{
-                a.cutBranch()
+                a.edgeChain.cutBranch()
             }
             //cut the longest maintain the shortest
             //longess is determined by length of the chain till they have a common ancestor

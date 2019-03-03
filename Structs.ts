@@ -2,6 +2,7 @@ enum KnotType{entry = 'entry',normal = 'normal',exit = 'exit'}
 enum EdgeType{normal = 'normal',high = 'high', entering = 'entering', exiting = 'exiting'}
 
 class Edge{
+    id:number
     edgeType:EdgeType = EdgeType.normal
     origin:Knot
     target:Knot
@@ -17,6 +18,15 @@ class Edge{
         return newedge
     }
 
+    enterable(text,stringpointer:number):Boolean{
+        for(let symbol of this.allowedSymbols){
+            if(text.substr(stringpointer,symbol.length) === symbol){
+                return true
+            }
+        }
+        return this.allowedSymbols.length == 0 || this.edgeType == EdgeType.high
+    }
+
     checkValidity(){
         return this.target.edgesIn.findIndex(e => e == this) != -1 &&
         this.origin.edges.findIndex(e => e == this) != -1
@@ -24,6 +34,7 @@ class Edge{
 }
 
 class Knot{
+    id:number
     edges:Edge[] = []
     edgesIn:Edge[] = []
     knotType:KnotType = KnotType.normal
@@ -150,9 +161,15 @@ class TreeNode{
 class System{
     begin:Knot
     end:Knot
+    width:number
+    height:number
     constructor(){
         this.begin = new Knot()
         this.end = new Knot()
+    }
+
+    draw(ctxt:CanvasRenderingContext2D){
+        
     }
 }
 
