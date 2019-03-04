@@ -5,6 +5,8 @@
   "main": "package.js",
   "dependencies": {
     "express": "^4.16.4",
+    "rect2x": "^1.3.0",
+    "rect3x": "^1.0.0",
     "typescript": "^3.3.3",
     "utilsx": "^1.11.0",
     "vectorx": "^3.3.1"

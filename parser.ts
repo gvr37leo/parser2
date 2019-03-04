@@ -12,6 +12,7 @@ class Parser{
         while(this.fingers.length > 0 && this.tree == null){
             this.step()
         }
+        return this.tree
     }
 
     step(){
