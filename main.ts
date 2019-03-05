@@ -2,7 +2,7 @@
 /// <reference path="parser.ts" />
 /// <reference path="node_modules/vectorx/vector.ts" />
 /// <reference path="node_modules/utilsx/utils.ts" />
-/// <reference path="node_modules/rect3x/rect.ts" />
+/// <reference path="rect.ts" />
 /// <reference path="Store.ts" />
 /// <reference path="system.ts" />
 
