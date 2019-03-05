@@ -29,18 +29,19 @@ var braces:System = new System()
 
 Diagram(braces,[
     terminal(new Edge(['('])),
-    choice([
-        terminal(new Edge(['a'])),
-        terminal(new Edge(['b'])),
-    ]),
+    // choice([
+    //     terminal(new Edge(['a'])),
+    //     terminal(new Edge(['b'])),
+    // ]),
     terminal(new Edge([')'])),
 ])
-braces.draw(ctxt)
+
 var cc = createCanvas(700,500)
 var canvas = cc.canvas
 var ctxt = cc.ctxt
-debugger
 var parser = new Parser(braces.begin)
+
+braces.draw(ctxt,new Vector(200,200))
 // var tree = parser.run()
 // console.log(tree)
 

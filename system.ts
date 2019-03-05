@@ -26,7 +26,10 @@ class System{
 
 function Diagram(holder:System,systems:System[]):void{
     holder.drawroutine = (ctxt,pos) => {
-
+        var boxes = positionCenter(pos.x,0,systems.map(s => s.box))
+        systems.forEach((system,i) => {
+            system.draw(ctxt,boxes[i].center())
+        })
     }
     mergeSystems(holder, systems)
     holder.begin.begin()
@@ -43,6 +46,13 @@ function optional(system:System):System{
 
 function choice(systems:System[]):System{
     var res = new System()
+    res.box = new Rect(new Vector(-10,-10), new Vector(10,10))
+    res.drawroutine = (ctxt,pos) => {
+        var boxes = positionCenter(pos.y,1,systems.map(s => s.box))
+        systems.forEach((system,i) => {
+            system.draw(ctxt,new Vector(0,0))
+        })        
+    }
     for(var system of systems){
         append(res.begin.edges, system.begin.edges)
         res.end.pilfer(system.end)
@@ -90,6 +100,22 @@ function subsystem(system:System):System{
     return subsystem
 }
 
-function spaceSystems(begin,skip){
+function positionCenter(center:number,dim:number,boxes:Rect[]){
+    var width = boxes.reduce((p, c) => p + c.size().vals[dim], 0)
+    return spaceSystems(center - width / 2,0,dim,boxes)
+}
+
+function spaceSystems(begin:number,skip:number,dim:number,rects:Rect[]):Rect[]{
+    var result:Rect[] = []
+    var current = begin
     
+    for(var rect of rects){
+        var topbottom = [200,300]
+        var size = rect.size()
+        var start = current
+        var end = start + size.vals[dim]
+        result.push(new Rect(new Vector(start,topbottom[0]),new Vector(end,topbottom[1])))
+        current += size.vals[dim] + skip
+    }
+    return result
 }
