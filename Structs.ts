@@ -27,7 +27,7 @@ class Edge{
         return this.allowedSymbols.length == 0 || this.edgeType == EdgeType.high
     }
 
-    checkValidity(){
+    checkBookKeeping(){
         return this.target.edgesIn.findIndex(e => e == this) != -1 &&
         this.origin.edges.findIndex(e => e == this) != -1
     }
@@ -71,19 +71,19 @@ class Knot{
         return this
     }
 
-    pilfer(victim:Knot):Knot{
+    pilferLeft(victim:Knot):Knot{
         append(this.edgesIn,victim.edgesIn)
         this.edgesIn.forEach(e => e.target = this)
         return this
     }
 
-    pilferOut(victim:Knot):Knot{
+    pilferRight(victim:Knot):Knot{
         append(this.edges,victim.edges)
         this.edges.forEach(e => e.origin = this)
         return this
     }
 
-    checkValidity(){
+    checkBookKeeping(){
         for(var edge of this.edges){
             if(edge.origin != this){
                 return false

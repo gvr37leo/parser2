@@ -5,6 +5,7 @@
 /// <reference path="rect.ts" />
 /// <reference path="Store.ts" />
 /// <reference path="system.ts" />
+/// <reference path="clickManager.ts" />
 
 
 

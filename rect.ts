@@ -4,6 +4,12 @@ class Rect{
     constructor(public min:Vector, public max:Vector){
     }
 
+    static fromWidthHeight(width:number,height:number,pos:Vector):Rect{
+        var halfwidth = width/2
+        var halfheight = height/2
+        return new Rect(new Vector(-halfwidth,-halfheight), new Vector(halfwidth,halfheight))
+    }
+
     c(){
         return new Rect(this.min.c(),this.max.c())
     }
@@ -61,10 +67,17 @@ class Rect{
        ctxt.fillRect(this.min.x,this.min.y,size.x,size.y)
     }
 
-    move(pos:Vector){
+    move(pos:Vector):Rect{
         var size = this.size()
         this.min = pos
         this.max = this.min.c().add(size)
+        return this
+    }
+
+    moveEdgeTo(to:Vector,relpos:Vector):Rect{
+        var from = this.getPoint(relpos)
+        var diff = from.to(to)
+        this.add(diff)
         return this
     }
 

@@ -15,54 +15,64 @@ class System{
         this.drawroutine(ctxt,pos)
     }
 
-    leftAttachment(){
-        return this.box.getPoint(new Vector(0,0.5))
-    }
-
-    rightAttachment(){
-        return this.box.getPoint(new Vector(1,0.5))
+    write(dst:System){
+        dst.begin = this.begin
+        dst.end = this.end
+        dst.box = this.box
+        dst.subsSystems = this.subsSystems
+        dst.drawroutine = this.drawroutine
     }
 }
 
 function Diagram(holder:System,systems:System[]):void{
-    holder.drawroutine = (ctxt,pos) => {
-        var boxes = positionCenter(pos.x,0,systems.map(s => s.box))
-        systems.forEach((system,i) => {
-            system.draw(ctxt,boxes[i].center())
-        })
-    }
-    mergeSystems(holder, systems)
+    var system = sequance(systems)
+    system.write(holder)
     holder.begin.begin()
     holder.end.end()
 }
 
+function sequance(systems:System[]){
+    var system = new System()
+    var width = systems.reduce((p,c) => p + c.box.size().x,0)
+    var height = Math.max(...systems.map(s => s.box.size().y))
+    system.box = Rect.fromWidthHeight(width + 40,height,new Vector(0,0))
+
+    system.drawroutine = (ctxt,pos) => {
+        var boxes = positionCenter(pos,0,systems.map(s => s.box))
+        systems.forEach((system,i) => {
+            system.draw(ctxt,boxes[i].center())
+        })
+    }
+    mergeSystems(system, systems)
+    return system
+}
+
 function optional(system:System):System{
-    var res = new System()
-    res.begin.bind(res.end)
-    res.begin.bind(system.begin)
-    system.end.bind(system.end)
-    return res
+    return choice([system,terminal(new Edge([]))])
 }
 
 function choice(systems:System[]):System{
-    var res = new System()
-    res.box = new Rect(new Vector(-10,-10), new Vector(10,10))
-    res.drawroutine = (ctxt,pos) => {
-        var boxes = positionCenter(pos.y,1,systems.map(s => s.box))
+    var system = new System()
+    var height = systems.reduce((p,c) => p + c.box.size().y,0)
+    var width = Math.max(...systems.map(s => s.box.size().x))
+    system.box = Rect.fromWidthHeight(width + 40,height,new Vector(0,0))
+
+    system.drawroutine = (ctxt,pos) => {
+        var boxes = positionCenter(pos,1,systems.map(s => s.box))
         systems.forEach((system,i) => {
-            system.draw(ctxt,new Vector(0,0))
+            system.draw(ctxt,boxes[i].center())
         })        
     }
     for(var system of systems){
-        append(res.begin.edges, system.begin.edges)
-        res.end.pilfer(system.end)
+        append(system.begin.edges, system.begin.edges)
+        system.end.pilferLeft(system.end)
     }
-    return res
+    return system
 }
 
 function plus(normal:System,repeat:System):System{
-    normal.end.edges = repeat.begin.edges
-    normal.begin.pilfer(repeat.end)
+    normal.end.edges = repeat.begin.edges//?
+    normal.begin.pilferLeft(repeat.end)
     return normal
 }
 
@@ -74,48 +84,51 @@ function mergeSystems(holder:System, systems:System[]){
     for(var i = 1; i < systems.length; i++){
         var left = systems[i - 1]
         var right = systems[i]
-        right.begin.pilfer(left.end)
+        right.begin.pilferLeft(left.end)
     }
-    holder.begin.pilferOut(systems[0].begin)
-    holder.end.pilfer(last(systems).end)
+    holder.begin.pilferRight(systems[0].begin)
+    holder.end.pilferLeft(last(systems).end)
 }
 
 function terminal(edge:Edge):System{
     var res = new System()
     res.box = new Rect(new Vector(-10,-10), new Vector(10,10))
-    res.drawroutine = (ctxt:CanvasRenderingContext2D,center:Vector) => {
-        var absbox = res.box.c().add(center)
-        line(ctxt,absbox.getPoint(new Vector(0,0.5)),absbox.getPoint(new Vector(1,0.5)))
-        circle(ctxt,center,20)
+    res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
+        var absbox = res.box.c().add(abscenter)
+        line(ctxt,absbox.left(),absbox.right())
+        circle(ctxt,abscenter,20)
     }
 
     res.begin.connect(edge,res.end)
     return res
 }
 
-function subsystem(system:System):System{
+function subsystem(system:System):System{//should behave similar to terminal
     var subsystem = new System()
     var newedge = Edge.highEdge(system.begin)
     subsystem.begin.connect(newedge,subsystem.end)
     return subsystem
 }
 
-function positionCenter(center:number,dim:number,boxes:Rect[]){
+function positionCenter(center:Vector,dim:number,boxes:Rect[]){
     var width = boxes.reduce((p, c) => p + c.size().vals[dim], 0)
-    return spaceSystems(center - width / 2,0,dim,boxes)
+    var temp = center.c()
+    temp.vals[0] -= width / 2
+    return spaceBlocks(temp,0,dim,boxes)
 }
 
-function spaceSystems(begin:number,skip:number,dim:number,rects:Rect[]):Rect[]{
+function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
     var result:Rect[] = []
     var current = begin
-    
+    var blockedge = dim == 0 ? new Vector(0,0.5) : new Vector(0.5,0)
     for(var rect of rects){
-        var topbottom = [200,300]
+        
         var size = rect.size()
         var start = current
-        var end = start + size.vals[dim]
-        result.push(new Rect(new Vector(start,topbottom[0]),new Vector(end,topbottom[1])))
-        current += size.vals[dim] + skip
+        
+        var temp = rect.c().moveEdgeTo(start,blockedge)//todo
+        result.push(temp)
+        current.vals[dim] += size.vals[dim] + skip
     }
     return result
 }
