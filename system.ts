@@ -52,22 +52,26 @@ function optional(system:System):System{
 }
 
 function choice(systems:System[]):System{
-    var system = new System()
+    debugger
+    var res = new System()
     var height = systems.reduce((p,c) => p + c.box.size().y,0)
     var width = Math.max(...systems.map(s => s.box.size().x))
-    system.box = Rect.fromWidthHeight(width + 40,height,new Vector(0,0))
+    res.box = Rect.fromWidthHeight(width + 40,height,new Vector(0,0))
 
-    system.drawroutine = (ctxt,pos) => {
+    res.drawroutine = (ctxt,pos) => {
         var boxes = positionCenter(pos,1,systems.map(s => s.box))
+        var absbox = res.box.c().moveEdgeTo(pos,new Vector(0.5,0.5))
         systems.forEach((system,i) => {
             system.draw(ctxt,boxes[i].center())
+            line(ctxt,absbox.left(),boxes[i].left())
+            line(ctxt,absbox.right(),boxes[i].right())
         })        
     }
     for(var system of systems){
-        append(system.begin.edges, system.begin.edges)
-        system.end.pilferLeft(system.end)
+        append(res.begin.edges, system.begin.edges)
+        res.end.pilferLeft(system.end)
     }
-    return system
+    return res
 }
 
 function plus(normal:System,repeat:System):System{
@@ -92,11 +96,15 @@ function mergeSystems(holder:System, systems:System[]){
 
 function terminal(edge:Edge):System{
     var res = new System()
-    res.box = new Rect(new Vector(-10,-10), new Vector(10,10))
+    res.box = new Rect(new Vector(-30,-10), new Vector(30,10))
     res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
         var absbox = res.box.c().add(abscenter)
+        
+        ctxt.fillStyle = 'black'
         line(ctxt,absbox.left(),absbox.right())
-        circle(ctxt,abscenter,20)
+        circle(ctxt,abscenter,10)
+        ctxt.fillStyle = 'white'
+        ctxt.fillText(edge.allowedSymbols.join(' '),abscenter.x,abscenter.y)
     }
 
     res.begin.connect(edge,res.end)

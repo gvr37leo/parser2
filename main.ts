@@ -27,19 +27,21 @@ var braces:System = new System()
 //     terminal(new Edge([')'])),
 // ])
 
-
 Diagram(braces,[
-    terminal(new Edge(['('])),
-    // choice([
-    //     terminal(new Edge(['a'])),
-    //     terminal(new Edge(['b'])),
-    // ]),
-    terminal(new Edge([')'])),
+    // terminal(new Edge(['('])),
+    choice([
+        terminal(new Edge(['a'])),
+        terminal(new Edge(['b'])),
+    ]),
+    // terminal(new Edge([')'])),
 ])
+
 
 var cc = createCanvas(700,500)
 var canvas = cc.canvas
 var ctxt = cc.ctxt
+ctxt.textAlign = "center"
+ctxt.textBaseline = "middle"
 var parser = new Parser(braces.begin)
 
 braces.draw(ctxt,new Vector(200,200))
