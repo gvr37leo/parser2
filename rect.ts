@@ -97,6 +97,17 @@ class Rect{
             callback(temp)
         })
     }
+
+    static boundingbox(rects:Rect[]):Rect{
+        var res = new Rect(new Vector(0,0),new Vector(0,0))
+        for(var rect of rects){
+            res.min.x = min(rect.min.x,res.min.x)
+            res.min.y = min(rect.min.y,res.min.y)
+            res.max.x = max(rect.max.x,res.max.x)
+            res.max.y = max(rect.max.y,res.max.y)
+        }
+        return res
+    }
 }
 
 function rangeOverlap(range1A:number,range1B:number,range2A:number,range2B:number){

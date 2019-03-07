@@ -3,6 +3,8 @@ class System{
     begin:Knot
     end:Knot
     box:Rect
+    leftanchor:Vector
+    rightanchor:Vector
     subsSystems:System[] = []
     drawroutine:(ctxt:CanvasRenderingContext2D,pos:Vector) => void
 
@@ -26,16 +28,25 @@ class System{
 
 function Diagram(holder:System,systems:System[]):void{
     var system = sequance(systems)
+    var sequenceDrawRoutine = system.drawroutine
     system.write(holder)
+    
+    holder.drawroutine = (ctxt, pos) => {
+        var absbox = holder.box.moveEdgeTo(pos, new Vector(0.5,0.5))
+        sequenceDrawRoutine(ctxt,pos)
+        vertline(ctxt,absbox.left(),20)
+        vertline(ctxt,absbox.right(),20)
+    }
     holder.begin.begin()
     holder.end.end()
 }
+
 
 function sequance(systems:System[]){
     var system = new System()
     var width = systems.reduce((p,c) => p + c.box.size().x,0)
     var height = Math.max(...systems.map(s => s.box.size().y))
-    system.box = Rect.fromWidthHeight(width + 40,height,new Vector(0,0))
+    system.box = Rect.fromWidthHeight(width,height,new Vector(0,0))
 
     system.drawroutine = (ctxt,pos) => {
         var boxes = positionCenter(pos,0,systems.map(s => s.box))
@@ -52,11 +63,10 @@ function optional(system:System):System{
 }
 
 function choice(systems:System[]):System{
-    debugger
     var res = new System()
     var height = systems.reduce((p,c) => p + c.box.size().y,0)
     var width = Math.max(...systems.map(s => s.box.size().x))
-    res.box = Rect.fromWidthHeight(width + 40,height,new Vector(0,0))
+    res.box = Rect.fromWidthHeight(width + 50,height,new Vector(0,0))
 
     res.drawroutine = (ctxt,pos) => {
         var boxes = positionCenter(pos,1,systems.map(s => s.box))
@@ -75,9 +85,22 @@ function choice(systems:System[]):System{
 }
 
 function plus(normal:System,repeat:System):System{
-    normal.end.edges = repeat.begin.edges//?
-    normal.begin.pilferLeft(repeat.end)
-    return normal
+    var res = new System()
+    normal.write(res)
+    // normal.box = Rect.boundingbox([normal.box, repeat.box.c().add(new Vector(0,30))])
+    res.drawroutine = (ctxt,pos) => {
+        normal.drawroutine(ctxt,pos)
+        repeat.drawroutine(ctxt,pos.c().add(new Vector(0,30)))
+        var normalabs = normal.box.c().add(pos)
+        var repeatabs = repeat.box.c().add(pos).add(new Vector(0,30))
+        line(ctxt,normalabs.right(),repeatabs.right())
+        line(ctxt,normalabs.left(),repeatabs.left())
+        
+    }
+
+    res.end.edges = repeat.begin.edges//?
+    res.begin.pilferLeft(repeat.end)
+    return res
 }
 
 function star(normal:System,repeat:System):System{
@@ -120,9 +143,9 @@ function subsystem(system:System):System{//should behave similar to terminal
 
 function positionCenter(center:Vector,dim:number,boxes:Rect[]){
     var width = boxes.reduce((p, c) => p + c.size().vals[dim], 0)
-    var temp = center.c()
-    temp.vals[0] -= width / 2
-    return spaceBlocks(temp,0,dim,boxes)
+    var start = center.c()
+    start.vals[dim] -= width / 2
+    return spaceBlocks(start,0,dim,boxes)
 }
 
 function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
