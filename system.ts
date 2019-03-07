@@ -59,7 +59,7 @@ function sequance(systems:System[]){
 }
 
 function optional(system:System):System{
-    return choice([system,terminal(new Edge([]))])
+    return choice([system,terminal(new Edge([]))])//or here
 }
 
 function choice(systems:System[]):System{
@@ -104,7 +104,7 @@ function plus(normal:System,repeat:System):System{
 }
 
 function star(normal:System,repeat:System):System{
-    return optional(plus(normal,repeat))
+    return optional(plus(normal,repeat))//here
 }
 
 function mergeSystems(holder:System, systems:System[]){
@@ -136,10 +136,22 @@ function terminal(edge:Edge):System{
 }
 
 function subsystem(system:System):System{//should behave similar to terminal
-    var subsystem = new System()
-    var newedge = Edge.highEdge(system.begin)
-    subsystem.begin.connect(newedge,subsystem.end)
-    return subsystem
+    var res = new System()
+    res.box = new Rect(new Vector(-30,-10), new Vector(30,10))
+
+    res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
+        var absbox = res.box.c().add(abscenter)
+        
+        ctxt.fillStyle = 'black'
+        line(ctxt,absbox.left(),absbox.right())
+        circle(ctxt,abscenter,10)
+        ctxt.fillStyle = 'white'
+        ctxt.fillText('sub',abscenter.x,abscenter.y)
+    }
+
+    var edge = Edge.highEdge(system.begin)
+    res.begin.connect(edge,res.end)
+    return res
 }
 
 function positionCenter(center:Vector,dim:number,boxes:Rect[]){

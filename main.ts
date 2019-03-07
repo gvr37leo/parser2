@@ -28,12 +28,13 @@ var braces:System = new System()
 // ])
 
 Diagram(braces,[
-    // terminal(new Edge(['a'])),
-    plus(
-        terminal(new Edge(['b'])),
-        terminal(new Edge(['c'])),
+    star(
+        choice([
+            terminal(new Edge(['a'])),
+            subsystem(braces),
+        ]),
+        terminal(new Edge([',']))
     ),
-    // terminal(new Edge(['d'])),
 ])
 
 
