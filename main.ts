@@ -28,12 +28,12 @@ var braces:System = new System()
 // ])
 
 Diagram(braces,[
-    terminal(new Edge(['a'])),
-    star(
+    // terminal(new Edge(['a'])),
+    plus(
         terminal(new Edge(['b'])),
         terminal(new Edge(['c'])),
     ),
-    terminal(new Edge(['a'])),
+    // terminal(new Edge(['d'])),
 ])
 
 
@@ -44,7 +44,7 @@ ctxt.textAlign = "center"
 ctxt.textBaseline = "middle"
 var parser = new Parser(braces.begin)
 
-braces.draw(ctxt,new Vector(200,200))
+// braces.draw(ctxt,new Vector(200,200))
 // var tree = parser.run()
 // console.log(tree)
 

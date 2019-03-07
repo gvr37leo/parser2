@@ -71,6 +71,12 @@ class Knot{
         return this
     }
 
+    pilferFull(victim:Knot):Knot{
+        this.pilferLeft(victim)
+        this.pilferRight(victim)
+        return this
+    }
+
     pilferLeft(victim:Knot):Knot{
         append(this.edgesIn,victim.edgesIn)
         this.edgesIn.forEach(e => e.target = this)

@@ -98,7 +98,7 @@ function plus(normal:System,repeat:System):System{
         
     }
 
-    res.end.edges = repeat.begin.edges//?
+    res.end.pilferRight(repeat.begin)
     res.begin.pilferLeft(repeat.end)
     return res
 }
@@ -108,13 +108,14 @@ function star(normal:System,repeat:System):System{
 }
 
 function mergeSystems(holder:System, systems:System[]){
+    
     for(var i = 1; i < systems.length; i++){
         var left = systems[i - 1]
         var right = systems[i]
-        right.begin.pilferLeft(left.end)
+        right.begin.pilferFull(left.end)
     }
-    holder.begin.pilferRight(systems[0].begin)
-    holder.end.pilferLeft(last(systems).end)
+    holder.begin.pilferFull(systems[0].begin)
+    holder.end.pilferFull(last(systems).end)
 }
 
 function terminal(edge:Edge):System{
