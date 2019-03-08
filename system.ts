@@ -18,7 +18,7 @@ class System{
     }
 
     write(dst:System){
-        dst.begin = this.begin
+        dst.begin.pilferFull(this.begin)
         dst.end = this.end
         dst.box = this.box
         dst.subsSystems = this.subsSystems
