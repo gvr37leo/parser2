@@ -59,7 +59,7 @@ function sequance(systems:System[]){
 }
 
 function optional(system:System):System{
-    return choice([system,terminal(new Edge([]))])//or here
+    return choice([system,skip()])
 }
 
 function choice(systems:System[]):System{
@@ -77,6 +77,7 @@ function choice(systems:System[]):System{
             line(ctxt,absbox.right(),boxes[i].right())
         })        
     }
+
     for(var system of systems){
         append(res.begin.edges, system.begin.edges)
         res.end.pilferLeft(system.end)
@@ -104,7 +105,7 @@ function plus(normal:System,repeat:System):System{
 }
 
 function star(normal:System,repeat:System):System{
-    return optional(plus(normal,repeat))//here
+    return optional(sequance([skip(),plus(normal,repeat),skip()]))//here
 }
 
 function mergeSystems(holder:System, systems:System[]){
@@ -133,6 +134,10 @@ function terminal(edge:Edge):System{
 
     res.begin.connect(edge,res.end)
     return res
+}
+
+function skip(){
+    return terminal(new Edge([]))   
 }
 
 function subsystem(system:System):System{//should behave similar to terminal
@@ -176,3 +181,4 @@ function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
     }
     return result
 }
+
