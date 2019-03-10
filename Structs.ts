@@ -6,12 +6,12 @@ class Edge{
     edgeType:EdgeType = EdgeType.normal
     origin:Knot
     target:Knot
-    subsystem:Knot
+    subsystem:System
     constructor(public allowedSymbols:string[]){
 
     }
 
-    static highEdge(subsystem:Knot){
+    static highEdge(subsystem:System){
         var newedge = new Edge([])
         newedge.edgeType = EdgeType.high
         newedge.subsystem = subsystem

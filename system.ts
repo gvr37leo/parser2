@@ -18,7 +18,7 @@ class System{
     }
 
     write(dst:System){
-        dst.begin.pilferFull(this.begin)
+        dst.begin = this.begin
         dst.end = this.end
         dst.box = this.box
         dst.subsSystems = this.subsSystems
@@ -154,7 +154,7 @@ function subsystem(system:System):System{//should behave similar to terminal
         ctxt.fillText('sub',abscenter.x,abscenter.y)
     }
 
-    var edge = Edge.highEdge(system.begin)
+    var edge = Edge.highEdge(system)
     res.begin.connect(edge,res.end)
     return res
 }

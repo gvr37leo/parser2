@@ -54,7 +54,7 @@ class Parser{
                 nextGenFingers.push(newFinger)
                 if(validEdge.edgeType == EdgeType.high){
                     newFinger.stack.push(validEdge)
-                    newFinger.chainStep(newFinger.knot.freeEdge(validEdge.subsystem, EdgeType.entering),'')
+                    newFinger.chainStep(newFinger.knot.freeEdge(validEdge.subsystem.begin, EdgeType.entering),'')
                 }else if(validEdge.edgeType == EdgeType.normal){
                     newFinger.stringpointer += symbols[i].length
                     newFinger.chainStep(validEdge,symbols[i])
