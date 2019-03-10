@@ -7,7 +7,7 @@ class Edge{
     origin:Knot
     target:Knot
     subsystem:System
-    whitelist:boolean = true
+    isWhitelist:boolean = true
     constructor(public symbols:string[]){
 
     }
@@ -35,7 +35,7 @@ class Edge{
                 break
             }
         }
-        if(this.whitelist == true){
+        if(this.isWhitelist == true){
             return {
                 enterable:found,
                 symbol:symbol

@@ -40,9 +40,14 @@ Diagram(value,[
     ])
 ])
 
+var anycharexceptdoublequote = new Edge(['"'])
+anycharexceptdoublequote.isWhitelist = false
 Diagram(string,[
     terminal(new Edge(['"'])),
-    terminal(new Edge(alphabet)),
+    star(
+        terminal(anycharexceptdoublequote),
+        skip(),
+    ),
     terminal(new Edge(['"'])),
 ])
 
