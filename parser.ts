@@ -24,22 +24,10 @@ class Parser{
             var symbols:string[] = []
 
             for(let targetEdge of finger.knot.edges){
-                if(targetEdge.edgeType == EdgeType.high){
+                let res = targetEdge.isEnterable(text, finger.stringpointer)
+                if(res.enterable){
                     validEdges.push(targetEdge)
-                    symbols.push('')
-                }else if(targetEdge.edgeType == EdgeType.normal){
-                    if(targetEdge.allowedSymbols.length == 0){
-                        validEdges.push(targetEdge)
-                        symbols.push('')
-                    }else{
-                        for(let symbol of targetEdge.allowedSymbols){
-                            if(text.substr(finger.stringpointer,symbol.length) === symbol){
-                                validEdges.push(targetEdge)
-                                symbols.push(symbol)
-                                break
-                            }
-                        }
-                    }
+                    symbols.push(res.symbol)
                 }
             }
 
@@ -59,11 +47,7 @@ class Parser{
                     newFinger.stringpointer += symbols[i].length
                     newFinger.chainStep(validEdge,symbols[i])
 
-
-
-                    if(validEdge.target.knotType == KnotType.normal){
-
-                    }else if(validEdge.target.knotType == KnotType.exit){
+                    if(validEdge.target.knotType == KnotType.exit){
                         if(newFinger.stack.length == 0){
                             this.fingers = nextGenFingers
                             this.tree = buildTree(reverseEdgeChain(newFinger.edgeChain)) 

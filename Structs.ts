@@ -7,7 +7,8 @@ class Edge{
     origin:Knot
     target:Knot
     subsystem:System
-    constructor(public allowedSymbols:string[]){
+    whitelist:boolean = true
+    constructor(public symbols:string[]){
 
     }
 
@@ -18,13 +19,33 @@ class Edge{
         return newedge
     }
 
-    enterable(text,stringpointer:number):Boolean{
-        for(let symbol of this.allowedSymbols){
-            if(text.substr(stringpointer,symbol.length) === symbol){
-                return true
+    isEnterable(text:string,stringpointer:number):{enterable:boolean,symbol:string}{
+        if(this.symbols.length == 0 || this.edgeType == EdgeType.high){
+            return {
+                enterable:true,
+                symbol:''
             }
         }
-        return this.allowedSymbols.length == 0 || this.edgeType == EdgeType.high
+        var found = false
+        let symbol
+        for(var i = 0; i < this.symbols.length; i++){
+            symbol = this.symbols[i]
+            if(text.substr(stringpointer,symbol.length) === symbol){
+                found = true
+                break
+            }
+        }
+        if(this.whitelist == true){
+            return {
+                enterable:found,
+                symbol:symbol
+            }
+        }else{
+            return {
+                enterable:!found,
+                symbol:text.substr(stringpointer,1)
+            }
+        }
     }
 
     checkBookKeeping(){

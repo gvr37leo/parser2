@@ -129,7 +129,7 @@ function terminal(edge:Edge):System{
         line(ctxt,absbox.left(),absbox.right())
         circle(ctxt,abscenter,10)
         ctxt.fillStyle = 'white'
-        ctxt.fillText(edge.allowedSymbols.join(' '),abscenter.x,abscenter.y)
+        ctxt.fillText(edge.symbols.join(' '),abscenter.x,abscenter.y)
     }
 
     res.begin.connect(edge,res.end)
