@@ -27,7 +27,7 @@ class System{
 }
 
 function Diagram(holder:System,systems:System[]):void{
-    var system = sequance(systems)
+    var system = sequence(systems)
     var sequenceDrawRoutine = system.drawroutine
     system.write(holder)
     
@@ -42,7 +42,7 @@ function Diagram(holder:System,systems:System[]):void{
 }
 
 
-function sequance(systems:System[]){
+function sequence(systems:System[]){
     var system = new System()
     var width = systems.reduce((p,c) => p + c.box.size().x,0)
     var height = Math.max(...systems.map(s => s.box.size().y))
@@ -105,7 +105,7 @@ function plus(normal:System,repeat:System):System{
 }
 
 function star(normal:System,repeat:System):System{
-    return optional(sequance([skip(),plus(normal,repeat),skip()]))//here
+    return optional(sequence([skip(),plus(normal,repeat),skip()]))//here
 }
 
 function mergeSystems(holder:System, systems:System[]){
@@ -129,7 +129,11 @@ function terminal(edge:Edge):System{
         line(ctxt,absbox.left(),absbox.right())
         circle(ctxt,abscenter,10)
         ctxt.fillStyle = 'white'
-        ctxt.fillText(edge.symbols.join(' '),abscenter.x,abscenter.y)
+        var text = edge.symbols.join(' ')
+        if(!edge.isWhitelist){
+            text = '!' + text
+        }
+        ctxt.fillText(text,abscenter.x,abscenter.y)
     }
 
     res.begin.connect(edge,res.end)
@@ -137,7 +141,14 @@ function terminal(edge:Edge):System{
 }
 
 function skip(){
-    return terminal(new Edge([]))   
+    var res = terminal(new Edge([]))
+    res.box = new Rect(new Vector(-30,-10), new Vector(30,10))
+    res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
+        var absbox = res.box.c().add(abscenter)
+        ctxt.fillStyle = 'black'
+        line(ctxt,absbox.left(),absbox.right())
+    }
+    return  res
 }
 
 function subsystem(system:System):System{//should behave similar to terminal

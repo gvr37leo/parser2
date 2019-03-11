@@ -1,4 +1,3 @@
-/// <reference path="Structs.ts" />
 class Parser{
 
     fingers:Finger[] = []
@@ -9,8 +8,13 @@ class Parser{
     }
 
     run(){
+        var i = 0
         while(this.fingers.length > 0 && this.tree == null){
+            if(i == 16){
+                debugger
+            }
             this.step()
+            i++
         }
         return this.tree
     }

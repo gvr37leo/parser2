@@ -6,10 +6,11 @@ var number = new System()
 var digit19 = ['1','2','3','4','5','6','7','8','9']
 var digit = ['0'].concat(digit19)
 var alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p','q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+var whitespace = [' ','\t','\n']
 Diagram(object,[
     terminal(new Edge(['{'])),
     star(
-        sequance([
+        sequence([
             subsystem(string),
             terminal(new Edge([':'])),
             subsystem(value),
@@ -55,13 +56,13 @@ Diagram(number,[
     optional(terminal(new Edge(['-']))),
     choice([
         terminal(new Edge(['0'])),
-        sequance([
+        sequence([
             terminal(new Edge(digit19)),
             plus(skip(),terminal(new Edge(digit)))
         ])
     ]),
     optional(
-        sequance([
+        sequence([
             terminal(new Edge(['.'])),
             plus(
                 terminal(new Edge(digit)),
@@ -70,7 +71,7 @@ Diagram(number,[
         ])
     ),
     optional(
-        sequance([
+        sequence([
             choice([
                 terminal(new Edge(['e'])),
                 terminal(new Edge(['E'])),
