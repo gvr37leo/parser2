@@ -141,7 +141,9 @@ function terminal(edge:Edge):System{
 }
 
 function skip(){
-    var res = terminal(new Edge([]))
+    var edge = new Edge([])
+    edge.isWhitelist = false
+    var res = terminal(edge)
     res.box = new Rect(new Vector(-30,-10), new Vector(30,10))
     res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
         var absbox = res.box.c().add(abscenter)

@@ -20,7 +20,7 @@ class Edge{
     }
 
     isEnterable(text:string,stringpointer:number):{enterable:boolean,symbol:string}{
-        if(this.symbols.length == 0 || this.edgeType == EdgeType.high){
+        if(this.edgeType == EdgeType.high){
             return {
                 enterable:true,
                 symbol:''

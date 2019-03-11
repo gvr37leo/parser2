@@ -25,9 +25,9 @@ var canvas = cc.canvas
 var ctxt = cc.ctxt
 ctxt.textAlign = "center"
 ctxt.textBaseline = "middle"
-var parser = new Parser(array.begin)
+var parser = new Parser(object.begin)
 
-string.draw(ctxt,new Vector(200,200))
-// var tree = parser.run()
-// console.log(tree)
+// string.draw(ctxt,new Vector(200,200))
+var tree = parser.run()
+console.log(tree)
 
