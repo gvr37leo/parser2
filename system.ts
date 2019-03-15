@@ -179,6 +179,10 @@ function positionCenter(center:Vector,dim:number,boxes:Rect[]){
     return spaceBlocks(start,0,dim,boxes)
 }
 
+function containBlock(blocks:Rect):Rect{
+    
+}
+
 function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
     var result:Rect[] = []
     var current = begin
