@@ -179,8 +179,12 @@ function positionCenter(center:Vector,dim:number,boxes:Rect[]){
     return spaceBlocks(start,0,dim,boxes)
 }
 
-function containBlock(blocks:Rect):Rect{
-    
+function containBlock(blocks:Rect[]):Rect{
+    var minheight = findbest(blocks.map(b => b.min.y),b => b)
+    var maxheight = findbest(blocks.map(b => b.max.y),b => b)
+    var minwidth = findbest(blocks.map(b => b.min.x),b => b)
+    var maxwidth = findbest(blocks.map(b => b.max.x),b => b)
+    return new Rect(new Vector(minwidth,minheight), new Vector(maxwidth,maxheight))
 }
 
 function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
