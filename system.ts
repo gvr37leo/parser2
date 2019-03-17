@@ -180,10 +180,10 @@ function positionCenter(center:Vector,dim:number,boxes:Rect[]){
 }
 
 function containBlock(blocks:Rect[]):Rect{
-    var minheight = findbest(blocks.map(b => b.min.y),b => b)
-    var maxheight = findbest(blocks.map(b => b.max.y),b => b)
-    var minwidth = findbest(blocks.map(b => b.min.x),b => b)
-    var maxwidth = findbest(blocks.map(b => b.max.x),b => b)
+    var minheight = findbest(blocks.map(b => b.min.y),v => -v)
+    var maxheight = findbest(blocks.map(b => b.max.y),v => v)
+    var minwidth = findbest(blocks.map(b => b.min.x),v => -v)
+    var maxwidth = findbest(blocks.map(b => b.max.x),v => v)
     return new Rect(new Vector(minwidth,minheight), new Vector(maxwidth,maxheight))
 }
 
