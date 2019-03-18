@@ -44,14 +44,13 @@ function Diagram(holder:System,systems:System[]):void{
 
 function sequence(systems:System[]){
     var system = new System()
-    var width = systems.reduce((p,c) => p + c.box.size().x,0)
-    var height = Math.max(...systems.map(s => s.box.size().y))
-    system.box = Rect.fromWidthHeight(width,height,new Vector(0,0))
+    var boxes = positionCenter(new Vector(0,0),0,systems.map(s => s.box))
+    system.box = boundingBox(boxes)
 
     system.drawroutine = (ctxt,pos) => {
-        var boxes = positionCenter(pos,0,systems.map(s => s.box))
+        var boxesabs = boxes.map(box => box.c().add(pos))
         systems.forEach((system,i) => {
-            system.draw(ctxt,boxes[i].center())
+            system.draw(ctxt,boxesabs[i].center())
         })
     }
     mergeSystems(system, systems)
@@ -64,17 +63,16 @@ function optional(system:System):System{
 
 function choice(systems:System[]):System{
     var res = new System()
-    var height = systems.reduce((p,c) => p + c.box.size().y,0)
-    var width = Math.max(...systems.map(s => s.box.size().x))
-    res.box = Rect.fromWidthHeight(width + 50,height,new Vector(0,0))
+    var boxes = positionCenter(new Vector(0,0),1,systems.map(s => s.box))
+    system.box = boundingBox(boxes)
 
     res.drawroutine = (ctxt,pos) => {
-        var boxes = positionCenter(pos,1,systems.map(s => s.box))
-        var absbox = res.box.c().moveEdgeTo(pos,new Vector(0.5,0.5))
+        var boxesabs = boxes.map(box => box.c().add(pos))
+        var systemboxabs = system.box.c().add(pos)
         systems.forEach((system,i) => {
-            system.draw(ctxt,boxes[i].center())
-            line(ctxt,absbox.left(),boxes[i].left())
-            line(ctxt,absbox.right(),boxes[i].right())
+            system.draw(ctxt,boxesabs[i].center())
+            line(ctxt,boxesabs[i].left(),systemboxabs.left())
+            line(ctxt,boxesabs[i].right(),systemboxabs.right())
         })        
     }
 
@@ -88,14 +86,19 @@ function choice(systems:System[]):System{
 function plus(normal:System,repeat:System):System{
     var res = new System()
     normal.write(res)
-    // normal.box = Rect.boundingbox([normal.box, repeat.box.c().add(new Vector(0,30))])
+    
+    // positionCenter(new Vector())
+    var boxes = positionLinearVertical(new Vector(0,0),[
+        normal.box,
+        repeat.box,
+    ])
+    res.box = boundingBox(boxes)
     res.drawroutine = (ctxt,pos) => {
-        normal.drawroutine(ctxt,pos)
-        repeat.drawroutine(ctxt,pos.c().add(new Vector(0,30)))
-        var normalabs = normal.box.c().add(pos)
-        var repeatabs = repeat.box.c().add(pos).add(new Vector(0,30))
-        line(ctxt,normalabs.right(),repeatabs.right())
-        line(ctxt,normalabs.left(),repeatabs.left())
+        var boxesabs = boxes.map(box => box.c().add(pos))
+        normal.drawroutine(ctxt,boxesabs[0].center())
+        repeat.drawroutine(ctxt,boxesabs[1].center())
+        line(ctxt,boxesabs[0].right(),boxesabs[1].right())
+        line(ctxt,boxesabs[0].left(),boxesabs[1].left())
         
     }
 
@@ -119,32 +122,11 @@ function mergeSystems(holder:System, systems:System[]){
     holder.end.pilferFull(last(systems).end)
 }
 
-function terminal(edge:Edge):System{
-    var res = new System()
-    res.box = new Rect(new Vector(-30,-10), new Vector(30,10))
-    res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
-        var absbox = res.box.c().add(abscenter)
-        
-        ctxt.fillStyle = 'black'
-        line(ctxt,absbox.left(),absbox.right())
-        circle(ctxt,abscenter,10)
-        ctxt.fillStyle = 'white'
-        var text = edge.symbols.join(' ')
-        if(!edge.isWhitelist){
-            text = '!' + text
-        }
-        ctxt.fillText(text,abscenter.x,abscenter.y)
-    }
-
-    res.begin.connect(edge,res.end)
-    return res
-}
-
 function skip(){
     var edge = new Edge([])
     edge.isWhitelist = false
     var res = terminal(edge)
-    res.box = new Rect(new Vector(-30,-10), new Vector(30,10))
+    res.box = Rect.fromWidthHeight(60,20,new Vector(0,0))
     res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
         var absbox = res.box.c().add(abscenter)
         ctxt.fillStyle = 'black'
@@ -153,18 +135,25 @@ function skip(){
     return  res
 }
 
-function subsystem(system:System):System{//should behave similar to terminal
+function terminal(edge:Edge):System{
     var res = new System()
-    res.box = new Rect(new Vector(-30,-10), new Vector(30,10))
+    res.box = Rect.fromWidthHeight(60,20,new Vector(0,0))
+    res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
+        var absbox = res.box.c().add(abscenter)
+        drawtextnode(ctxt,absbox,(edge.isWhitelist ? '' : '!') + edge.symbols.join(' '))
+    }
+
+    res.begin.connect(edge,res.end)
+    return res
+}
+
+function subsystem(system:System):System{
+    var res = new System()
+    res.box = Rect.fromWidthHeight(60,20,new Vector(0,0))
 
     res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
         var absbox = res.box.c().add(abscenter)
-        
-        ctxt.fillStyle = 'black'
-        line(ctxt,absbox.left(),absbox.right())
-        circle(ctxt,abscenter,10)
-        ctxt.fillStyle = 'white'
-        ctxt.fillText('sub',abscenter.x,abscenter.y)
+        drawtextnode(ctxt,absbox,'sub')
     }
 
     var edge = Edge.highEdge(system)
@@ -172,19 +161,33 @@ function subsystem(system:System):System{//should behave similar to terminal
     return res
 }
 
-function positionCenter(center:Vector,dim:number,boxes:Rect[]){
+function drawtextnode(ctxt:CanvasRenderingContext2D,absbox:Rect,text:string){
+    var abscenter = absbox.center()
+    ctxt.fillStyle = 'black'
+    line(ctxt,absbox.left(),absbox.right())
+    circle(ctxt,abscenter,10)
+    ctxt.fillStyle = 'white'
+    ctxt.fillText(text,abscenter.x,abscenter.y)
+}
+
+function boundingBox(blocks:Rect[]):Rect{
+    var minheight = findbest(blocks.map(b => b.min.y),v => -v)
+    var maxheight = findbest(blocks.map(b => b.max.y),v => v)
+    var minwidth = findbest(blocks.map(b => b.min.x),v => -v)
+    var maxwidth = findbest(blocks.map(b => b.max.x),v => v)
+    return new Rect(new Vector(minwidth,minheight), new Vector(maxwidth,maxheight))
+}
+
+function positionCenter(center:Vector,dim:number,boxes:Rect[]):Rect[]{
     var width = boxes.reduce((p, c) => p + c.size().vals[dim], 0)
     var start = center.c()
     start.vals[dim] -= width / 2
     return spaceBlocks(start,0,dim,boxes)
 }
 
-function containBlock(blocks:Rect[]):Rect{
-    var minheight = findbest(blocks.map(b => b.min.y),v => -v)
-    var maxheight = findbest(blocks.map(b => b.max.y),v => v)
-    var minwidth = findbest(blocks.map(b => b.min.x),v => -v)
-    var maxwidth = findbest(blocks.map(b => b.max.x),v => v)
-    return new Rect(new Vector(minwidth,minheight), new Vector(maxwidth,maxheight))
+function positionLinearVertical(start:Vector, boxes:Rect[]):Rect[]{
+    var offsetstart = start.c().sub(boxes[0].center().to(boxes[0].top()))
+    return spaceBlocks(offsetstart,0,1,boxes)
 }
 
 function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
