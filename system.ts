@@ -192,12 +192,11 @@ function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
     var current = begin
     var blockedge = dim == 0 ? new Vector(0,0.5) : new Vector(0.5,0)
     for(var rect of rects){
-        
-        var size = rect.size()
-        var start = current
-        
-        var temp = rect.c().moveEdgeTo(start,blockedge)//todo
+        var temp = rect.c()
+        temp.add(current)
         result.push(temp)
+
+        var size = rect.size()
         current.vals[dim] += size.vals[dim] + skip
     }
     return result

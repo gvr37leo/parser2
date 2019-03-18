@@ -23,3 +23,7 @@ function vertline(ctxt:CanvasRenderingContext2D,center:Vector,length:number){
     bot.y -= length / 2
     line(ctxt,top,bot)
 }
+
+function findbest<T>(list:T[], evaluator:(val:T) => number):T {
+    return list[findbestIndex(list,evaluator)]
+}
