@@ -44,13 +44,16 @@ function Diagram(holder:System,systems:System[]):void{
 
 function sequence(systems:System[]){
     var system = new System()
-    var boxes = positionCenter(new Vector(0,0),0,systems.map(s => s.box))
+    var boxes = positionCenter(new Vector(0,0),0,0,systems.map(s => s.box))
     system.box = boundingBox(boxes)
 
     system.drawroutine = (ctxt,pos) => {
-        var boxesabs = boxes.map(box => box.c().add(pos))
+        // var boxesabs = boxes.map(box => box.c().add(pos))
         systems.forEach((system,i) => {
-            system.draw(ctxt,boxesabs[i].center())
+            // system.draw(ctxt,boxesabs[i].center())//dont draw system at system centered on center but centered at systems origin
+            // new Vector()
+            system.draw(ctxt,pos.c().add(boxes[i].center()))
+            // system.draw(ctxt,pos)
         })
     }
     mergeSystems(system, systems)
@@ -63,12 +66,14 @@ function optional(system:System):System{
 
 function choice(systems:System[]):System{
     var res = new System()
-    var boxes = positionCenter(new Vector(0,0),1,systems.map(s => s.box))
-    system.box = boundingBox(boxes)
+    var boxes = positionCenter(new Vector(0,0),1,10,systems.map(s => s.box))
+    res.box = boundingBox(boxes)
+    res.box.min.x -= 10
+    res.box.max.x += 10
 
     res.drawroutine = (ctxt,pos) => {
         var boxesabs = boxes.map(box => box.c().add(pos))
-        var systemboxabs = system.box.c().add(pos)
+        var systemboxabs = res.box.c().add(pos)
         systems.forEach((system,i) => {
             system.draw(ctxt,boxesabs[i].center())
             line(ctxt,boxesabs[i].left(),systemboxabs.left())
@@ -76,7 +81,7 @@ function choice(systems:System[]):System{
         })        
     }
 
-    for(var system of systems){
+    for(let system of systems){
         append(res.begin.edges, system.begin.edges)
         res.end.pilferLeft(system.end)
     }
@@ -135,6 +140,10 @@ function skip(){
     return  res
 }
 
+function simpleTerminal(symbol:string){
+    return terminal(new Edge([symbol]))
+}
+
 function terminal(edge:Edge):System{
     var res = new System()
     res.box = Rect.fromWidthHeight(60,20,new Vector(0,0))
@@ -178,29 +187,35 @@ function boundingBox(blocks:Rect[]):Rect{
     return new Rect(new Vector(minwidth,minheight), new Vector(maxwidth,maxheight))
 }
 
-function positionCenter(center:Vector,dim:number,boxes:Rect[]):Rect[]{
-    var width = boxes.reduce((p, c) => p + c.size().vals[dim], 0)
+function positionCenter(center:Vector,dim:number,margin:number,boxes:Rect[]):Rect[]{
+    var width = blockrowwidth(boxes,margin,dim)
     var start = center.c()
     start.vals[dim] -= width / 2
-    return spaceBlocks(start,0,dim,boxes)
+    return spaceBlocks(start,margin,dim,boxes)
 }
 
 function positionLinearVertical(start:Vector, boxes:Rect[]):Rect[]{
-    var offsetstart = start.c().sub(boxes[0].center().to(boxes[0].top()))
+    var offsetstart = new Vector(0,0 - boxes[0].size().y / 2)
     return spaceBlocks(offsetstart,0,1,boxes)
+}
+
+function blockrowwidth(boxes:Rect[],skip:number,dim:number){
+    var width = boxes.reduce((p, c) => p + c.size().vals[dim], 0)
+    return width + (boxes.length - 1) * skip
 }
 
 function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
     var result:Rect[] = []
     var current = begin
-    var blockedge = dim == 0 ? new Vector(0,0.5) : new Vector(0.5,0)
     for(var rect of rects){
-        var temp = rect.c()
-        temp.add(current)
-        result.push(temp)
-
-        var size = rect.size()
-        current.vals[dim] += size.vals[dim] + skip
+        var topleft = new Vector(0,0)
+        topleft.vals[dim] = current.vals[dim]
+        topleft.vals[1-dim] = rect.min.vals[1 - dim]
+        var newrect = Rect.fromPosSize(topleft, rect.size())
+        // var newrect = Rect.fromPosSize(new Vector(current.x,rect.min.y), rect.size())//works only for horinzontal
+        // var newrect = Rect.fromPosSize(new Vector(rect.min.x,current.y), rect.size())//works only for vertical
+        result.push(newrect)
+        current.vals[dim] += rect.size().vals[dim] + skip
     }
     return result
 }

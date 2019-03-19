@@ -4,6 +4,10 @@ class Rect{
     constructor(public min:Vector, public max:Vector){
     }
 
+    static fromPosSize(pos:Vector, size:Vector){
+        return new Rect(pos,pos.c().add(size))
+    }
+
     static fromWidthHeight(width:number,height:number,pos:Vector):Rect{
         var halfwidth = width/2
         var halfheight = height/2

@@ -25,17 +25,22 @@ var canvas = cc.canvas
 var ctxt = cc.ctxt
 ctxt.textAlign = "center"
 ctxt.textBaseline = "middle"
-var parser = new Parser(object.begin)
+// var parser = new Parser(object.begin)
 
 var test = new System()
 Diagram(test,[
-    choice([
-        terminal(new Edge(['a'])),
-        terminal(new Edge(['b'])),
-    ])
+    simpleTerminal('a'),
+    simpleTerminal('a'),
 ])
 
-value.draw(ctxt,new Vector(200,200))
+var b = new System()
+Diagram(b,[
+    plus(simpleTerminal('a'),skip()),
+    plus(simpleTerminal('a'),skip()),
+])
+
+test.draw(ctxt,new Vector(200,200))
+b.draw(ctxt,new Vector(200,300))
 // var tree = parser.run()
 // console.log(tree)
 
