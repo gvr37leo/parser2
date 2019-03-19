@@ -48,12 +48,8 @@ function sequence(systems:System[]){
     system.box = boundingBox(boxes)
 
     system.drawroutine = (ctxt,pos) => {
-        // var boxesabs = boxes.map(box => box.c().add(pos))
         systems.forEach((system,i) => {
-            // system.draw(ctxt,boxesabs[i].center())//dont draw system at system centered on center but centered at systems origin
-            // new Vector()
-            system.draw(ctxt,pos.c().add(boxes[i].center()))
-            // system.draw(ctxt,pos)
+            system.draw(ctxt,pos.c().add(new Vector(boxes[i].center().x,0)))
         })
     }
     mergeSystems(system, systems)
@@ -64,12 +60,15 @@ function optional(system:System):System{
     return choice([system,skip()])
 }
 
+// function choiceFocused(focus:number,systems:System[]):System{
+
+// }
+
 function choice(systems:System[]):System{
     var res = new System()
     var boxes = positionCenter(new Vector(0,0),1,10,systems.map(s => s.box))
     res.box = boundingBox(boxes)
-    res.box.min.x -= 10
-    res.box.max.x += 10
+    res.box.widen(10)
 
     res.drawroutine = (ctxt,pos) => {
         var boxesabs = boxes.map(box => box.c().add(pos))
@@ -98,13 +97,16 @@ function plus(normal:System,repeat:System):System{
         repeat.box,
     ])
     res.box = boundingBox(boxes)
+    // res.box.widen(10)
     res.drawroutine = (ctxt,pos) => {
+        var boundingboxabs = res.box.c().add(pos)
         var boxesabs = boxes.map(box => box.c().add(pos))
         normal.drawroutine(ctxt,boxesabs[0].center())
         repeat.drawroutine(ctxt,boxesabs[1].center())
         line(ctxt,boxesabs[0].right(),boxesabs[1].right())
         line(ctxt,boxesabs[0].left(),boxesabs[1].left())
-        
+        // line(ctxt,boxesabs[0].right(),boundingboxabs.right())
+        // line(ctxt,boxesabs[0].left(),boundingboxabs.left())
     }
 
     res.end.pilferRight(repeat.begin)
@@ -143,13 +145,14 @@ function skip(){
 function simpleTerminal(symbol:string){
     return terminal(new Edge([symbol]))
 }
-
+// var edgenodes = new Map<Edge,Rect>()
 function terminal(edge:Edge):System{
     var res = new System()
     res.box = Rect.fromWidthHeight(60,20,new Vector(0,0))
     res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
         var absbox = res.box.c().add(abscenter)
         drawtextnode(ctxt,absbox,(edge.isWhitelist ? '' : '!') + edge.symbols.join(' '))
+        // edgenodes.set(edge,absbox)
     }
 
     res.begin.connect(edge,res.end)
@@ -204,6 +207,7 @@ function blockrowwidth(boxes:Rect[],skip:number,dim:number){
     return width + (boxes.length - 1) * skip
 }
 
+
 function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
     var result:Rect[] = []
     var current = begin
@@ -219,4 +223,20 @@ function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
     }
     return result
 }
+
+// function spaceBlocks(begin:Vector,skip:number,dim:number,rects:Rect[]):Rect[]{
+//     var result:Rect[] = []
+//     var current = begin
+//     for(var rect of rects){
+//         var topleft = new Vector(0,0)
+//         topleft.vals[dim] = current.vals[dim]
+//         topleft.vals[1-dim] = rect.min.vals[1 - dim]
+//         var newrect = Rect.fromPosSize(topleft, rect.size())
+//         // var newrect = Rect.fromPosSize(new Vector(current.x,rect.min.y), rect.size())//works only for horinzontal
+//         // var newrect = Rect.fromPosSize(new Vector(rect.min.x,current.y), rect.size())//works only for vertical
+//         result.push(newrect)
+//         current.vals[dim] += rect.size().vals[dim] + skip
+//     }
+//     return result
+// }
 

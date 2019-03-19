@@ -14,6 +14,11 @@ class Rect{
         return new Rect(new Vector(-halfwidth,-halfheight), new Vector(halfwidth,halfheight))
     }
 
+    widen(val:number){
+        this.min.x -= val
+        this.max.x += val
+    }
+
     c(){
         return new Rect(this.min.c(),this.max.c())
     }
