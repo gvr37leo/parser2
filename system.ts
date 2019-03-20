@@ -26,6 +26,9 @@ class System{
     }
 }
 
+var edgenodes = new Map<Edge,Rect>()
+var knotpositions = new Map<Knot,Vector>()
+
 function Diagram(holder:System,systems:System[]):void{
     var system = sequence(systems)
     var sequenceDrawRoutine = system.drawroutine
@@ -60,10 +63,6 @@ function optional(system:System):System{
     return choice([system,skip()])
 }
 
-// function choiceFocused(focus:number,systems:System[]):System{
-
-// }
-
 function choice(systems:System[]):System{
     var res = new System()
     var boxes = positionCenter(new Vector(0,0),1,10,systems.map(s => s.box))
@@ -73,6 +72,8 @@ function choice(systems:System[]):System{
     res.drawroutine = (ctxt,pos) => {
         var boxesabs = boxes.map(box => box.c().add(pos))
         var systemboxabs = res.box.c().add(pos)
+        knotpositions.set(res.begin,systemboxabs.left())
+        knotpositions.set(res.end,systemboxabs.right())
         systems.forEach((system,i) => {
             system.draw(ctxt,boxesabs[i].center())
             line(ctxt,boxesabs[i].left(),systemboxabs.left())
@@ -136,8 +137,13 @@ function skip(){
     res.box = Rect.fromWidthHeight(60,20,new Vector(0,0))
     res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
         var absbox = res.box.c().add(abscenter)
+        edgenodes.set(edge,absbox)
+        knotpositions.set(res.begin,absbox.left())
+        knotpositions.set(res.end,absbox.right())
+        res.begin
         ctxt.fillStyle = 'black'
         line(ctxt,absbox.left(),absbox.right())
+        
     }
     return  res
 }
@@ -145,14 +151,18 @@ function skip(){
 function simpleTerminal(symbol:string){
     return terminal(new Edge([symbol]))
 }
-// var edgenodes = new Map<Edge,Rect>()
+
 function terminal(edge:Edge):System{
     var res = new System()
     res.box = Rect.fromWidthHeight(60,20,new Vector(0,0))
     res.drawroutine = (ctxt:CanvasRenderingContext2D,abscenter:Vector) => {
         var absbox = res.box.c().add(abscenter)
+        edgenodes.set(edge,absbox)
+        knotpositions.set(res.begin,absbox.left())
+        knotpositions.set(res.end,absbox.right())
         drawtextnode(ctxt,absbox,(edge.isWhitelist ? '' : '!') + edge.symbols.join(' '))
-        // edgenodes.set(edge,absbox)
+        
+
     }
 
     res.begin.connect(edge,res.end)
