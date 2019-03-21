@@ -3,8 +3,7 @@ class System{
     begin:Knot
     end:Knot
     box:Rect
-    leftanchor:Vector
-    rightanchor:Vector
+    anchorOffset:number = 0
     subsSystems:System[] = []
     drawroutine:(ctxt:CanvasRenderingContext2D,pos:Vector) => void
 
@@ -51,6 +50,7 @@ function sequence(systems:System[]){
     system.box = boundingBox(boxes)
 
     system.drawroutine = (ctxt,pos) => {
+        var absboxes = boxes.map(b => b.c().add(pos))
         systems.forEach((system,i) => {
             system.draw(ctxt,pos.c().add(new Vector(boxes[i].center().x,0)))
         })
@@ -92,13 +92,12 @@ function plus(normal:System,repeat:System):System{
     var res = new System()
     normal.write(res)
     
-    // positionCenter(new Vector())
-    var boxes = positionLinearVertical(new Vector(0,0),[
+    var boxes =  positionCenteredOnBox(new Vector(0,0),10,1,0,[
         normal.box,
         repeat.box,
     ])
     res.box = boundingBox(boxes)
-    // res.box.widen(10)
+    res.box.widen(10)
     res.drawroutine = (ctxt,pos) => {
         var boundingboxabs = res.box.c().add(pos)
         var boxesabs = boxes.map(box => box.c().add(pos))
@@ -106,8 +105,8 @@ function plus(normal:System,repeat:System):System{
         repeat.drawroutine(ctxt,boxesabs[1].center())
         line(ctxt,boxesabs[0].right(),boxesabs[1].right())
         line(ctxt,boxesabs[0].left(),boxesabs[1].left())
-        // line(ctxt,boxesabs[0].right(),boundingboxabs.right())
-        // line(ctxt,boxesabs[0].left(),boundingboxabs.left())
+        line(ctxt,boxesabs[0].right(),boundingboxabs.right())
+        line(ctxt,boxesabs[0].left(),boundingboxabs.left())
     }
 
     res.end.pilferRight(repeat.begin)
@@ -207,9 +206,16 @@ function positionCenter(center:Vector,dim:number,margin:number,boxes:Rect[]):Rec
     return spaceBlocks(start,margin,dim,boxes)
 }
 
-function positionLinearVertical(start:Vector, boxes:Rect[]):Rect[]{
-    var offsetstart = new Vector(0,0 - boxes[0].size().y / 2)
-    return spaceBlocks(offsetstart,0,1,boxes)
+function positionCenteredOnBox(focusedBlockCenter:Vector,skip:number,dim:number,index:number,boxes:Rect[]):Rect[]{
+    var offset = boxes[0].size().vals[dim] / 2
+    for(var i = 1; i <= index; i++){
+        offset += boxes[i - 1].size().vals[dim] / 2
+        offset += boxes[i].size().vals[dim] / 2
+    }
+    offset += index * skip
+    var absstart = focusedBlockCenter.c()
+    absstart.vals[dim] -= offset
+    return spaceBlocks(absstart,skip,dim,boxes)
 }
 
 function blockrowwidth(boxes:Rect[],skip:number,dim:number){

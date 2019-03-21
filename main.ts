@@ -13,6 +13,10 @@
 /// <reference path="edgeChain.ts" />
 /// <reference path="finger.ts" />
 /// <reference path="defs/xmldef.ts" />
+/// <reference path="node_modules/eventsystemx/EventSystem.ts" />
+/// <reference path="slider.ts" />
+
+
 
 //https://github.com/tabatkins/railroad-diagrams
 //https://tabatkins.github.io/railroad-diagrams/generator.html#Diagram(%0A%20%20'('%2C%0A%20%20ZeroOrMore(%0A%20%20%20%20Choice(0%2C'a'%2C'V')%0A%20%20)%2C%0A%20%20')'%2C%0A)
@@ -41,6 +45,24 @@ Diagram(b,[
 
 test.draw(ctxt,new Vector(200,200))
 b.draw(ctxt,new Vector(200,300))
+
+// ctxt.strokeStyle = 'red'
+// for(var edgenode of edgenodes.values()){
+//     line(ctxt,edgenode.left(),edgenode.right())
+// }
+
+// ctxt.fillStyle = 'pink'
+// for(var knotpos of knotpositions.values()){
+//     circle(ctxt,knotpos,5)
+// }
+
+// for(var i = 0; i < 100; i++){
+//     parser
+// }
+
 // var tree = parser.run()
 // console.log(tree)
 
+var slider = new Slider()
+slider.input.set(5)
+console.log(slider)
