@@ -37,14 +37,14 @@ Diagram(test,[
     simpleTerminal('a'),
 ])
 
-var b = new System()
-Diagram(b,[
+var test = new System()
+Diagram(test,[
     plus(simpleTerminal('a'),skip()),
     plus(simpleTerminal('a'),skip()),
 ])
 
 test.draw(ctxt,new Vector(200,200))
-b.draw(ctxt,new Vector(200,300))
+test.draw(ctxt,new Vector(200,300))
 
 // ctxt.strokeStyle = 'red'
 // for(var edgenode of edgenodes.values()){
@@ -63,6 +63,40 @@ b.draw(ctxt,new Vector(200,300))
 // var tree = parser.run()
 // console.log(tree)
 
-var slider = new Slider()
-slider.input.set(5)
-console.log(slider)
+// a   b
+//[0]-[0]
+//[1]-[0] set a to 1
+//[1]-[1] a sets b to 1
+//[1]-[1] b is notified and triggered but doesnt set a
+//maybe set event with a handled flag?
+
+var a1
+var b2
+class Eventx<T>{
+    handled = false
+
+    constructor(public val:T){
+
+    }
+}
+var a = new Box(new Eventx(0))
+var b = new Box(new Eventx(0))
+
+a.onchange.listen(v => {
+    a1 = v
+    if(!v.handled){
+        v.handled = true
+        b.set(v)
+    }
+})
+
+b.onchange.listen(v => {
+    b2 = v
+    if(!v.handled){
+        v.handled = true
+        a.set(v)
+    }
+})
+
+a.set(new Eventx(1))
+console.log(1)

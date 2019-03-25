@@ -45,29 +45,3 @@ class ProtectedBox<T>{
     
 }
 
-class Slider{
-
-    input:ProtectedBox<number>
-    slider:ProtectedBox<number>
-    inputel = 0
-    sliderel = 0
-
-    constructor(){
-        this.input = new ProtectedBox(0)
-        this.slider = new ProtectedBox(0)
-
-        //input change -> set slider -> slider change ->| set input
-
-        this.input.onchange.listen(v => {
-            this.inputel = v.val
-            v.handled = true
-            this.slider.setS(v)
-        })
-
-        this.slider.onchange.listen(v => {
-            this.sliderel = v.val
-            v.handled = true
-            this.input.setS(v)
-        })
-    }
-}
