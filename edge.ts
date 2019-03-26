@@ -8,8 +8,15 @@ class Edge{
     target:Knot
     subsystem:System
     isWhitelist:boolean = true
+
     constructor(public symbols:string[]){
 
+    }
+
+    static optional(){
+        var edge = new Edge([])
+        edge.isWhitelist = false
+        return edge
     }
 
     static highEdge(subsystem:System){
@@ -43,7 +50,7 @@ class Edge{
         }else{
             return {
                 enterable:!found,
-                symbol:text.substr(stringpointer,1)
+                symbol:''
             }
         }
     }

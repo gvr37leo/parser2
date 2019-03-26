@@ -12,6 +12,13 @@ class System{
         this.end = new Knot()
     }
 
+    static FromBeginAndEnd(begin:Knot,end:Knot){
+        var system = new System()
+        system.begin = begin
+        system.end = end
+        return system
+    }
+
     draw(ctxt:CanvasRenderingContext2D,pos:Vector){
         this.drawroutine(ctxt,pos)
     }
@@ -147,7 +154,7 @@ function skip(){
     return  res
 }
 
-function simpleTerminal(symbol:string){
+function term(symbol:string){
     return terminal(new Edge([symbol]))
 }
 

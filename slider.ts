@@ -1,47 +1,39 @@
-class PBVal<T>{
-    
 
-    constructor(public handled:boolean, public val:T){
+class Eventx<T>{
+    handled = false
+
+    constructor(public val:T){
 
     }
 }
 
-class ProtectedBox<T>{
-
-    onchange:EventSystem<PBVal<T>>
-    box:Box<PBVal<T>>
+class PBox<T>{
+    private box:Box<Eventx<T>>
+    onchange:EventSystem<Eventx<T>>
 
     constructor(val:T){
-        this.onchange = new EventSystem()
-        this.box = new Box(new PBVal(false,val))
+        this.box = new Box(new Eventx(val))
+        this.onchange = this.box.onchange
     }
 
-    get(){
+    get():T{
         return this.box.value.val
     }
 
-    set(val:T){
-        this.setS(new PBVal(false,val))
+    set(v:T){
+        var e = new Eventx(v)
+        e.handled = false
+        this.box.set(e)
     }
 
-    setS(val:PBVal<T>){
-        this.box.set(val)
-        if(val.handled == false){
-            this.trigger(val)
+    setS(e:Eventx<T>){
+        this.box.set(e)
+    }
+
+    setH(e:Eventx<T>){
+        if(!e.handled){
+            e.handled = true
+            this.setS(e)
         }
-        
     }
-
-    listen(cb:(val:PBVal<T>) => void){
-        this.onchange.listen(v => {
-            cb(v)
-        })
-    }
-
-    trigger(val:PBVal<T>){
-        this.onchange.trigger(val)
-    }
-
-    
 }
-

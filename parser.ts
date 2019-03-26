@@ -10,8 +10,9 @@ class Parser{
     run(){
         var i = 0
         while(this.fingers.length > 0 && this.tree == null){
-            if(i == 16){
-                debugger
+            if(i > 300){
+                console.error('infinite loop')
+                break
             }
             this.step()
             i++
